@@ -3,3 +3,4 @@
 .vagrant/
 output-*/
 packer_cache/
+.DS_Store
