@@ -1,5 +1,10 @@
 #!/bin/bash -eux
 
+if [ "$SYSLOG_NG" == false ]; then
+    echo "Syslog-ng support disabled"
+    exit 0
+fi
+
 sudo yum remove -y rsyslog
 sudo yum install -y syslog-ng
 sudo sh -c "echo '' > /var/log/secure"
@@ -58,4 +63,4 @@ EOF'
 
 sudo systemctl enable syslog-ng
 sudo systemctl restart syslog-ng
-sudo bash -c "echo '\$config['enable_syslog'] = 1;' >> /opt/librenms/config.php"
+sudo bash -c "echo '\$config[\"enable_syslog\"] = 1;' >> /opt/librenms/config.php"

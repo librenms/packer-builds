@@ -1,9 +1,13 @@
 #!/bin/bash -eux
 
+if [ -z "$LIBRENMS_VERSION"]; then
+  LIBRENMS_VERSION="master"
+fi
+
 sudo yum install -y epel-release
 sudo yum update -y
 sudo rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
-sudo yum install composer cronie fping git ImageMagick jwhois mariadb mariadb-server mtr MySQL-python net-snmp net-snmp-utils nginx nmap php72w php72w-cli php72w-common php72w-curl php72w-fpm php72w-gd php72w-mbstring php72w-mysqlnd php72w-process php72w-snmp php72w-xml php72w-zip python-memcached rrdtool libargon2
+sudo yum install -y composer cronie fping git ImageMagick jwhois mariadb mariadb-server mtr MySQL-python net-snmp net-snmp-utils nginx nmap php72w php72w-cli php72w-common php72w-curl php72w-fpm php72w-gd php72w-mbstring php72w-mysqlnd php72w-process php72w-snmp php72w-xml php72w-zip python-memcached rrdtool libargon2
 
 sudo useradd librenms -d /opt/librenms -M -r
 sudo usermod -a -G librenms nginx
@@ -12,86 +16,25 @@ sudo bash -c 'cat <<EOF > /etc/sudoers.d/librenms
 Defaults:librenms !requiretty
 librenms ALL=(ALL) NOPASSWD: ALL
 EOF'
+
 sudo chmod 440 /etc/sudoers.d/librenms
 
-sudo sh -c 'cd /opt/librenms; composer create-project --no-dev --keep-vcs librenms/librenms librenms dev-master'
+sudo sh -c "cd /opt; composer create-project --no-dev --keep-vcs librenms/librenms:$LIBRENMS_VERSION librenms dev-master"
 
 # Change php to UTC TZ
 sudo sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php.ini
 sudo sed -i "s/^user =.*/user = nginx/" /etc/php-fpm.d/www.conf
 sudo sed -i "s/^group =.*/group = apache/" /etc/php-fpm.d/www.conf
-sudo sed -i "s/^listen =.*/listen = /var/run/php-fpm/php7.2-fpm.sock/" /etc/php-fpm.d/www.conf
-sudo sed -i "s/^listen.owner =.*/listen.owner = nginx/" /etc/php-fpm.d/www.conf
-sudo sed -i "s/^listen.group =.*/listen.group = nginx/" /etc/php-fpm.d/www.conf
-sudo sed -i "s/^listen.mode =.*/listen.mode = 0660/" /etc/php-fpm.d/www.conf
+sudo sed -i "s/^listen =.*/listen = \/var\/run\/php-fpm\/php7.2-fpm.sock/" /etc/php-fpm.d/www.conf
+sudo sed -i "s/^;listen.owner =.*/listen.owner = nginx/" /etc/php-fpm.d/www.conf
+sudo sed -i "s/^;listen.group =.*/listen.group = nginx/" /etc/php-fpm.d/www.conf
+sudo sed -i "s/^;listen.mode =.*/listen.mode = 0660/" /etc/php-fpm.d/www.conf
 
 sudo systemctl enable php-fpm
 sudo systemctl restart php-fpm
 
-sudo bash -c 'cat << EOF > /etc/nginx/conf.d/librenms.conf
-server {
- listen      80;
- server_name librenms.example.com;
- root        /opt/librenms/html;
- index       index.php;
-
- charset utf-8;
- gzip on;
- gzip_types text/css application/javascript text/javascript application/x-javascript image/svg+xml text/plain text/xsd text/xsl text/xml image/x-icon;
- location / {
-  try_files $uri $uri/ /index.php?$query_string;
- }
- location /api/v0 {
-  try_files $uri $uri/ /api_v0.php?$query_string;
- }
- location ~ \.php {
-  include fastcgi.conf;
-  fastcgi_split_path_info ^(.+\.php)(/.+)$;
-  fastcgi_pass unix:/var/run/php-fpm/php7.2-fpm.sock;
- }
- location ~ /\.ht {
-  deny all;
- }
-}
-EOF'
-
-sudo bash -c 'cat << EOF > /etc/nginx/nginx.conf
-# For more information on configuration, see:
-#   * Official English Documentation: http://nginx.org/en/docs/
-#   * Official Russian Documentation: http://nginx.org/ru/docs/
-
-user nginx;
-worker_processes auto;
-error_log /var/log/nginx/error.log;
-pid /run/nginx.pid;
-
-events {
-    worker_connections 1024;
-}
-
-http {
-    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-                      '$status $body_bytes_sent "$http_referer" '
-                      '"$http_user_agent" "$http_x_forwarded_for"';
-
-    access_log  /var/log/nginx/access.log  main;
-
-    sendfile            on;
-    tcp_nopush          on;
-    tcp_nodelay         on;
-    keepalive_timeout   65;
-    types_hash_max_size 2048;
-
-    include             /etc/nginx/mime.types;
-    default_type        application/octet-stream;
-
-    # Load modular configuration files from the /etc/nginx/conf.d directory.
-    # See http://nginx.org/en/docs/ngx_core_module.html#include
-    # for more information.
-    include /etc/nginx/conf.d/*.conf;
-
-}
-EOF'
+sudo cp /tmp/librenms.conf /etc/nginx/conf.d/librenms.conf
+sudo cp /tmp/nginx.conf /etc/nginx/nginx.conf
 
 sudo rm -f /etc/httpd/conf.d/welcome.conf
 sudo chgrp apache /var/lib/php/session/
@@ -99,7 +42,7 @@ sudo chgrp apache /var/lib/php/session/
 sudo systemctl enable nginx
 sudo systemctl restart nginx
 
-sudo yum install policycoreutils-python
+sudo yum install -y policycoreutils-python
 sudo semanage fcontext -a -t httpd_sys_content_t '/opt/librenms/logs(/.*)?'
 sudo semanage fcontext -a -t httpd_sys_rw_content_t '/opt/librenms/logs(/.*)?'
 sudo restorecon -RFvv /opt/librenms/logs/
@@ -115,7 +58,7 @@ sudo restorecon -RFvv /opt/librenms/bootstrap/cache/
 sudo setsebool -P httpd_can_sendmail=1
 sudo setsebool -P httpd_execmem 1
 
-sudo bash -c 'cat << EOF > ~/http_fping.tt'
+sudo bash -c 'cat <<EOF > /tmp/http_fping.tt
 module http_fping 1.0;
 
 require {
@@ -129,10 +72,10 @@ allow httpd_t self:capability net_raw;
 allow httpd_t self:rawip_socket { getopt create setopt write read };
 EOF'
 
-sudo checkmodule -M -m -o http_fping.mod ~/http_fping.tt
+sudo checkmodule -M -m -o http_fping.mod /tmp/http_fping.tt
 sudo semodule_package -o http_fping.pp -m http_fping.mod
 sudo semodule -i http_fping.pp
-sudo rm -f ~/http_fping.tt
+sudo rm -f /tmp/http_fping.tt
 
 sudo firewall-cmd --zone public --add-service http
 sudo firewall-cmd --permanent --zone public --add-service http
@@ -161,10 +104,22 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now rrdcached.service
 
 sudo bash -c 'cat << EOF > /etc/my.cnf.d/server.cnf
+#
+# These groups are read by MariaDB server.
+# Use it for options that only the server (but not clients) should see
+#
+# See the examples of server my.cnf files in /usr/share/mysql/
+#
+
+# this is read by the standalone daemon and embedded servers
+[server]
 innodb_file_per_table=1
 lower_case_table_names=0
 sql-mode=""
 EOF'
+
+sudo systemctl restart mariadb
+sudo systemctl enable mariadb
 
 mysql_pass="D42nf23rewD";
 
@@ -174,16 +129,13 @@ echo "CREATE DATABASE librenms;
             IDENTIFIED BY '$mysql_pass';
             FLUSH PRIVILEGES;" | mysql -u root
 
-sudo systemctl restart mariadb
-sudo systemcl enable mariadb
-
 sudo cp /opt/librenms/config.php.default /opt/librenms/config.php
 
 sudo sed -i 's/USERNAME/librenms/g' /opt/librenms/config.php
 sudo sed -i "s/PASSWORD/${mysql_pass}/g" /opt/librenms/config.php
-sudo bash -c "echo '\$config["fping"] = \"/usr/sbin/fping\";' >> /opt/librenms/config.php"
-sudo bash -c "echo '\$config['rrdcached'] = \"unix:/var/run/rrdcached/rrdcached.sock\";' >> /opt/librenms/config.php"
-sudo bash -c "echo '\$config['update_channel'] = \"release\";' >> /opt/librenms/config.php"
+sudo bash -c "echo '\$config[\"fping\"] = \"/usr/sbin/fping\";' >> /opt/librenms/config.php"
+sudo bash -c "echo '\$config[\"rrdcached\"] = \"unix:/var/run/rrdcached/rrdcached.sock\";' >> /opt/librenms/config.php"
+sudo bash -c "echo '\$config[\"update_channel\"] = \"release\";' >> /opt/librenms/config.php"
 
 sudo rm /etc/snmp/snmpd.conf
 sudo bash -c "echo 'rocommunity public 127.0.0.1' > /etc/snmp/snmpd.conf"

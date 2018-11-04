@@ -80,8 +80,24 @@
     },
     "vmx_remove_ethernet_interfaces": true
   }],
-  "provisioners": [{
+  "provisioners": [
+  {
+    "type": "file",
+    "source": "files/centos/nginx.conf",
+    "destination": "/tmp/nginx.conf"
+  },
+  {
+    "type": "file",
+    "source": "files/centos/librenms.conf",
+    "destination": "/tmp/librenms.conf"
+  },
+  {
     "type": "shell",
+    "environment_vars": [
+      "LIBRENMS_VERSION={{user `librenms_version`}}",
+      "OXIDIZED={{user `oxidized`}}",
+      "SYSLOG_NG={{user `syslog_ng`}}"
+    ],
     "scripts": [
       "scripts/centos-7.4/repo.sh",
       "scripts/centos/virtualbox.sh",
@@ -96,7 +112,8 @@
       "scripts/common/finish.sh",
       "scripts/common/minimize.sh"
     ]
-  }],
+  }
+  ],
   "variables": {
     "compression_level": "6",
     "cpus": "1",
