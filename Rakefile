@@ -48,35 +48,6 @@ namespace :packer do
     end
   end
 
-  desc 'Build and upload the vagrant box to Atlas'
-  task :release, [:template, :slug, :version, :provider] do |_t, args|
-    template = Pathname.new(args[:template])
-    slug     = args[:slug]
-    version  = args[:version]
-    provider = args[:provider]
-
-    json = JSON.parse(template.read)
-
-    builders = json['builders']
-    builders.select! do |builder|
-      builder['type'] == VAGRANT_PROVIDERS[provider.to_sym][:builder_type]
-    end
-
-    post_processors = json['post-processors']
-    post_processors << atlas_post_processor_config(slug, version, provider)
-    json['post-processors'] = [post_processors]
-
-    file = Tempfile.open('packer-templates') do |f|
-      f.tap do |f|
-        JSON.dump(json, f)
-      end
-    end
-
-    unless system("packer build -var-file=vars/release.json '#{file.path}'")
-      puts Rainbow("Failed to release #{slug} to Atlas").red
-      raise "Failed to release #{slug} to Atlas"
-    end
-  end
 end
 
 desc 'Run serverspec tests'
@@ -100,14 +71,3 @@ def available?(response)
   response.is_a?(Net::HTTPSuccess)
 end
 
-def atlas_post_processor_config(slug, version, provider)
-  {
-    'type' => 'atlas',
-    'artifact' => slug,
-    'artifact_type' => 'vagrant.box',
-    'metadata' => {
-      'version' => version,
-      'provider' => provider
-    }
-  }
-end

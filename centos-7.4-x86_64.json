@@ -5,7 +5,7 @@
     "iso_checksum": "{{user `iso_checksum`}}",
     "iso_checksum_type": "{{user `iso_checksum_type`}}",
     "output_directory": "output-centos-7.4-x86_64-{{build_type}}",
-    "vm_name": "packer-centos-7.4-x86_64",
+    "vm_name": "librenms-centos-7.4-x86_64",
     "disk_size": "{{user `disk_size`}}",
     "headless": "{{user `headless`}}",
     "http_directory": "http",
@@ -31,7 +31,7 @@
     "iso_checksum": "{{user `iso_checksum`}}",
     "iso_checksum_type": "{{user `iso_checksum_type`}}",
     "output_directory": "output-centos-7.4-x86_64-{{build_type}}",
-    "vm_name": "packer-centos-7.4-x86_64",
+    "vm_name": "librenms-centos-7.4-x86_64",
     "disk_size": "{{user `disk_size`}}",
     "headless": "{{user `headless`}}",
     "http_directory": "http",
@@ -49,7 +49,8 @@
     "vboxmanage": [
       ["modifyvm", "{{.Name}}", "--memory", "{{user `memory`}}"],
       ["modifyvm", "{{.Name}}", "--cpus", "{{user `cpus`}}"]
-    ]
+    ],
+    "format": "ova"
   }, {
     "type": "vmware-iso",
     "guest_os_type": "centos-64",
@@ -57,7 +58,7 @@
     "iso_checksum": "{{user `iso_checksum`}}",
     "iso_checksum_type": "{{user `iso_checksum_type`}}",
     "output_directory": "output-centos-7.4-x86_64-{{build_type}}",
-    "vm_name": "packer-centos-7.4-x86_64",
+    "vm_name": "librenms-centos-7.4-x86_64",
     "disk_size": "{{user `disk_size`}}",
     "headless": "{{user `headless`}}",
     "http_directory": "http",
@@ -79,8 +80,24 @@
     },
     "vmx_remove_ethernet_interfaces": true
   }],
-  "provisioners": [{
+  "provisioners": [
+  {
+    "type": "file",
+    "source": "files/centos/nginx.conf",
+    "destination": "/tmp/nginx.conf"
+  },
+  {
+    "type": "file",
+    "source": "files/centos/librenms.conf",
+    "destination": "/tmp/librenms.conf"
+  },
+  {
     "type": "shell",
+    "environment_vars": [
+      "LIBRENMS_VERSION={{user `librenms_version`}}",
+      "OXIDIZED={{user `oxidized`}}",
+      "SYSLOG_NG={{user `syslog_ng`}}"
+    ],
     "scripts": [
       "scripts/centos-7.4/repo.sh",
       "scripts/centos/virtualbox.sh",
@@ -89,14 +106,14 @@
       "scripts/common/sshd.sh",
       "scripts/centos/locale.sh",
       "scripts/centos-7.4/cleanup.sh",
+      "scripts/centos/librenms.sh",
+      "scripts/centos/syslog-ng.sh",
+      "scripts/centos/oxidized.sh",
+      "scripts/common/finish.sh",
       "scripts/common/minimize.sh"
     ]
-  }],
-  "post-processors": [{
-    "type": "vagrant",
-    "compression_level": "{{user `compression_level`}}",
-    "output": "centos-7.4-x86_64-{{.Provider}}.box"
-  }],
+  }
+  ],
   "variables": {
     "compression_level": "6",
     "cpus": "1",

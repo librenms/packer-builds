@@ -1,7 +1,7 @@
 {
   "builders": [{
     "type": "qemu",
-    "iso_url": "{{user `mirror`}}/16.04/ubuntu-16.04.4-server-amd64.iso",
+    "iso_url": "{{user `mirror`}}/16.04/ubuntu-16.04.5-server-amd64.iso",
     "iso_checksum": "{{user `iso_checksum`}}",
     "iso_checksum_type": "{{user `iso_checksum_type`}}",
     "output_directory": "output-ubuntu-16.04-amd64-{{build_type}}",
@@ -41,7 +41,7 @@
   }, {
     "type": "virtualbox-iso",
     "guest_os_type": "Ubuntu_64",
-    "iso_url": "{{user `mirror`}}/16.04/ubuntu-16.04.4-server-amd64.iso",
+    "iso_url": "{{user `mirror`}}/16.04/ubuntu-16.04.5-server-amd64.iso",
     "iso_checksum": "{{user `iso_checksum`}}",
     "iso_checksum_type": "{{user `iso_checksum_type`}}",
     "output_directory": "output-ubuntu-16.04-amd64-{{build_type}}",
@@ -81,7 +81,7 @@
   }, {
     "type": "vmware-iso",
     "guest_os_type": "ubuntu-64",
-    "iso_url": "{{user `mirror`}}/16.04/ubuntu-16.04.4-server-amd64.iso",
+    "iso_url": "{{user `mirror`}}/16.04/ubuntu-16.04.5-server-amd64.iso",
     "iso_checksum": "{{user `iso_checksum`}}",
     "iso_checksum_type": "{{user `iso_checksum_type`}}",
     "output_directory": "output-ubuntu-16.04-amd64-{{build_type}}",
