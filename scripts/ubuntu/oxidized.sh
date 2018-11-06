@@ -5,10 +5,10 @@ if [ "$OXIDIZED" == false ]; then
     exit 0
 fi
 
-sudo yum install -y make cmake which sqlite-devel openssl-devel libssh2-devel ruby gcc ruby-devel libicu-devel gcc-c++ rubygem-rake
-sudo git clone https://github.com/ytti/oxidized.git /opt/oxidized/
-sudo gem install bundler
-sudo sh -c "(cd /opt/oxidized && rake install)"
+sudo add-apt-repository universe
+sudo apt install -y ruby ruby-dev libsqlite3-dev libssl-dev pkg-config cmake libssh2-1-dev libicu-dev zlib1g-dev
+sudo gem install oxidized
+sudo gem install oxidized-script oxidized-web
 sudo useradd oxidized
 sudo bash -c 'cat << EOF > /etc/systemd/system/oxidized.service
 [Unit]

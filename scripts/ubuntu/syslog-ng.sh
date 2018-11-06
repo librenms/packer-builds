@@ -5,8 +5,8 @@ if [ "$SYSLOG_NG" == false ]; then
     exit 0
 fi
 
-sudo yum remove -y rsyslog
-sudo yum install -y syslog-ng
+sudo apt remove -y rsyslog
+sudo apt install -y syslog-ng
 sudo sh -c "echo '' > /var/log/secure"
 
 sudo bash -c 'cat << EOF > /etc/syslog-ng/syslog-ng.conf

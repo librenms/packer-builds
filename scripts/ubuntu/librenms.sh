@@ -4,13 +4,12 @@ if [ -z "$LIBRENMS_VERSION"]; then
   LIBRENMS_VERSION="master"
 fi
 
-sudo yum install -y epel-release
-sudo yum update -y
-sudo rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
-sudo yum install -y composer cronie fping git ImageMagick jwhois mariadb mariadb-server mtr MySQL-python net-snmp net-snmp-utils nginx nmap php72w php72w-cli php72w-common php72w-curl php72w-fpm php72w-gd php72w-mbstring php72w-mysqlnd php72w-process php72w-snmp php72w-xml php72w-zip python-memcached rrdtool libargon2
+sudo add-apt-repository universe
+sudo apt update -y
+sudo apt install -y curl composer fping git graphviz imagemagick mariadb-client mariadb-server mtr-tiny nginx-full nmap php7.2-cli php7.2-curl php7.2-fpm php7.2-gd php7.2-json php7.2-mbstring php7.2-mysql php7.2-snmp php7.2-xml php7.2-zip python-memcache python-mysqldb rrdtool snmp snmpd whois acl
 
 sudo useradd librenms -d /opt/librenms -M -r
-sudo usermod -a -G librenms nginx
+sudo usermod -a -G librenms www-data
 
 sudo bash -c 'cat <<EOF > /etc/sudoers.d/librenms
 Defaults:librenms !requiretty
@@ -22,7 +21,8 @@ sudo chmod 440 /etc/sudoers.d/librenms
 sudo sh -c "cd /opt; composer create-project --no-dev --keep-vcs librenms/librenms:$LIBRENMS_VERSION librenms dev-master"
 
 # Change php to UTC TZ
-sudo sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php.ini
+sudo sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php/7.2/fpm/php.ini
+sudo sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php/7.2/cli/php.ini
 sudo sed -i "s/^user =.*/user = nginx/" /etc/php-fpm.d/www.conf
 sudo sed -i "s/^group =.*/group = apache/" /etc/php-fpm.d/www.conf
 sudo sed -i "s/^listen =.*/listen = \/var\/run\/php-fpm\/php7.2-fpm.sock/" /etc/php-fpm.d/www.conf
@@ -30,17 +30,18 @@ sudo sed -i "s/^;listen.owner =.*/listen.owner = nginx/" /etc/php-fpm.d/www.conf
 sudo sed -i "s/^;listen.group =.*/listen.group = nginx/" /etc/php-fpm.d/www.conf
 sudo sed -i "s/^;listen.mode =.*/listen.mode = 0660/" /etc/php-fpm.d/www.conf
 
-sudo systemctl enable php-fpm
-sudo systemctl restart php-fpm
+sudo systemctl enable php7.2-fpm
+sudo systemctl restart php7.2-fpm
 
 sudo cp /tmp/librenms.conf /etc/nginx/conf.d/librenms.conf
 sudo cp /tmp/nginx.conf /etc/nginx/nginx.conf
 
-sudo rm -f /etc/httpd/conf.d/welcome.conf
-sudo chgrp apache /var/lib/php/session/
+sudo rm -f /etc/nginx/sites-enabled/default
 
 sudo systemctl enable nginx
 sudo systemctl restart nginx
+
+sudo cp /opt/librenms/misc/librenms.logrotate /etc/logrotate.d/librenms
 
 sudo yum install -y policycoreutils-python
 sudo semanage fcontext -a -t httpd_sys_content_t '/opt/librenms/logs(/.*)?'
@@ -57,25 +58,6 @@ sudo semanage fcontext -a -t httpd_sys_rw_content_t '/opt/librenms/bootstrap/cac
 sudo restorecon -RFvv /opt/librenms/bootstrap/cache/
 sudo setsebool -P httpd_can_sendmail=1
 sudo setsebool -P httpd_execmem 1
-
-sudo bash -c 'cat <<EOF > /tmp/http_fping.tt
-module http_fping 1.0;
-
-require {
-type httpd_t;
-class capability net_raw;
-class rawip_socket { getopt create setopt write read };
-}
-
-#============= httpd_t ==============
-allow httpd_t self:capability net_raw;
-allow httpd_t self:rawip_socket { getopt create setopt write read };
-EOF'
-
-sudo checkmodule -M -m -o http_fping.mod /tmp/http_fping.tt
-sudo semodule_package -o http_fping.pp -m http_fping.mod
-sudo semodule -i http_fping.pp
-sudo rm -f /tmp/http_fping.tt
 
 sudo firewall-cmd --zone public --add-service http
 sudo firewall-cmd --permanent --zone public --add-service http
@@ -103,7 +85,7 @@ EOF'
 sudo systemctl daemon-reload
 sudo systemctl enable --now rrdcached.service
 
-sudo bash -c 'cat << EOF > /etc/my.cnf.d/server.cnf
+sudo bash -c 'cat << EOF > /etc/mysql/mariadb.conf.d/50-server.cnf
 #
 # These groups are read by MariaDB server.
 # Use it for options that only the server (but not clients) should see
@@ -118,8 +100,8 @@ lower_case_table_names=0
 sql-mode=""
 EOF'
 
-sudo systemctl restart mariadb
-sudo systemctl enable mariadb
+sudo systemctl enable mysql
+sudo systemctl restart mysql
 
 mysql_pass="D42nf23rewD";
 
@@ -133,7 +115,6 @@ sudo cp /opt/librenms/config.php.default /opt/librenms/config.php
 
 sudo sed -i 's/USERNAME/librenms/g' /opt/librenms/config.php
 sudo sed -i "s/PASSWORD/${mysql_pass}/g" /opt/librenms/config.php
-sudo bash -c "echo '\$config[\"fping\"] = \"/usr/sbin/fping\";' >> /opt/librenms/config.php"
 sudo bash -c "echo '\$config[\"rrdcached\"] = \"unix:/var/run/rrdcached/rrdcached.sock\";' >> /opt/librenms/config.php"
 sudo bash -c "echo '\$config[\"update_channel\"] = \"release\";' >> /opt/librenms/config.php"
 
@@ -160,5 +141,5 @@ sudo bash -c "echo '*/5 * * * * librenms /opt/librenms/html/plugins/Weathermap/m
 sudo sed -i "s/16/4/g" /etc/cron.d/librenms
 
 sudo chown -R librenms:librenms /opt/librenms
-sudo setfacl -d -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
-sudo setfacl -R -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
+#sudo setfacl -d -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
+#sudo setfacl -R -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
