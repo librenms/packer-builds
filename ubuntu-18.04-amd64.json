@@ -58,7 +58,13 @@
         "vm_name": "librenms-ubuntu-18.04-amd64",
         "format": "ova"
     }],
-    "provisioners": [{
+    "provisioners": [
+    {
+      "type": "file",
+      "source": "files/ubuntu/librenms.conf",
+      "destination": "/tmp/librenms.conf"
+    },
+    {
         "environment_vars": [
             "DEBIAN_FRONTEND=noninteractive",
             "DESKTOP={{user `desktop`}}",
