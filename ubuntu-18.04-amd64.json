@@ -28,7 +28,7 @@
     "iso_checksum_type": "{{ user `iso_checksum_type` }}",
     "iso_urls": [
         "{{ user `iso_path` }}/{{ user `iso_name` }}",
-        "{{ user `mirror`}}/ubuntu/releases/bionic/release/{{ user `iso_name` }}"
+        "{{ user `mirror` }}/ubuntu/releases/bionic/release/{{ user `iso_name` }}"
     ],
     "shutdown_command": "echo '{{ user `ssh_password` }}'|sudo -S shutdown -P now",
     "ssh_password": "{{ user `ssh_password` }}",
