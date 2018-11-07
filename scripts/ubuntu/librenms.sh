@@ -6,7 +6,7 @@ fi
 
 sudo add-apt-repository universe
 sudo apt update -y
-sudo apt install -y curl composer fping git graphviz imagemagick mariadb-client mariadb-server mtr-tiny nginx-full nmap php7.2-cli php7.2-curl php7.2-fpm php7.2-gd php7.2-json php7.2-mbstring php7.2-mysql php7.2-snmp php7.2-xml php7.2-zip python-memcache python-mysqldb rrdtool snmp snmpd whois acl
+sudo apt install -y curl composer fping git graphviz imagemagick mariadb-client mariadb-server mtr-tiny nginx-full nmap php7.2-cli php7.2-curl php7.2-fpm php7.2-gd php7.2-json php7.2-mbstring php7.2-mysql php7.2-snmp php7.2-xml php7.2-zip python-memcache python-mysqldb rrdtool snmp snmpd whois acl python-mysqldb
 
 sudo useradd librenms -d /opt/librenms -M -r
 sudo usermod -a -G librenms www-data
@@ -23,18 +23,11 @@ sudo sh -c "cd /opt; composer create-project --no-dev --keep-vcs librenms/libren
 # Change php to UTC TZ
 sudo sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php/7.2/fpm/php.ini
 sudo sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php/7.2/cli/php.ini
-sudo sed -i "s/^user =.*/user = nginx/" /etc/php-fpm.d/www.conf
-sudo sed -i "s/^group =.*/group = apache/" /etc/php-fpm.d/www.conf
-sudo sed -i "s/^listen =.*/listen = \/var\/run\/php-fpm\/php7.2-fpm.sock/" /etc/php-fpm.d/www.conf
-sudo sed -i "s/^;listen.owner =.*/listen.owner = nginx/" /etc/php-fpm.d/www.conf
-sudo sed -i "s/^;listen.group =.*/listen.group = nginx/" /etc/php-fpm.d/www.conf
-sudo sed -i "s/^;listen.mode =.*/listen.mode = 0660/" /etc/php-fpm.d/www.conf
 
 sudo systemctl enable php7.2-fpm
 sudo systemctl restart php7.2-fpm
 
 sudo cp /tmp/librenms.conf /etc/nginx/conf.d/librenms.conf
-sudo cp /tmp/nginx.conf /etc/nginx/nginx.conf
 
 sudo rm -f /etc/nginx/sites-enabled/default
 
@@ -43,27 +36,12 @@ sudo systemctl restart nginx
 
 sudo cp /opt/librenms/misc/librenms.logrotate /etc/logrotate.d/librenms
 
-sudo yum install -y policycoreutils-python
-sudo semanage fcontext -a -t httpd_sys_content_t '/opt/librenms/logs(/.*)?'
-sudo semanage fcontext -a -t httpd_sys_rw_content_t '/opt/librenms/logs(/.*)?'
-sudo restorecon -RFvv /opt/librenms/logs/
-sudo semanage fcontext -a -t httpd_sys_content_t '/opt/librenms/rrd(/.*)?'
-sudo semanage fcontext -a -t httpd_sys_rw_content_t '/opt/librenms/rrd(/.*)?'
-sudo restorecon -RFvv /opt/librenms/rrd/
-sudo semanage fcontext -a -t httpd_sys_content_t '/opt/librenms/storage(/.*)?'
-sudo semanage fcontext -a -t httpd_sys_rw_content_t '/opt/librenms/storage(/.*)?'
-sudo restorecon -RFvv /opt/librenms/storage/
-sudo semanage fcontext -a -t httpd_sys_content_t '/opt/librenms/bootstrap/cache(/.*)?'
-sudo semanage fcontext -a -t httpd_sys_rw_content_t '/opt/librenms/bootstrap/cache(/.*)?'
-sudo restorecon -RFvv /opt/librenms/bootstrap/cache/
-sudo setsebool -P httpd_can_sendmail=1
-sudo setsebool -P httpd_execmem 1
-
 sudo firewall-cmd --zone public --add-service http
 sudo firewall-cmd --permanent --zone public --add-service http
 sudo firewall-cmd --zone public --add-service https
 sudo firewall-cmd --permanent --zone public --add-service https
 
+sudo apt install -y rrdcached
 sudo mkdir /var/run/rrdcached
 sudo chown librenms:librenms /var/run/rrdcached
 sudo chmod 755 /var/run/rrdcached
