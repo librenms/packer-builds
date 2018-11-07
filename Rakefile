@@ -35,8 +35,9 @@ namespace :packer do
       mirror = json['variables']['mirror']
       iso = json['variables']['iso_name']
       iso_urls = json['builders'].map do |builder|
-        builder['iso_urls'].at(1).sub('{{ user `mirror` }}', mirror)
-        builder['iso_urls'].at(1).sub('{{ user `iso_name` }}', iso)
+        iso_url = builder['iso_urls'].at(1).sub('{{ user `mirror` }}', mirror)
+        iso_url.sub('{{ user `iso_name` }}', iso)
+        put iso_url
       end
       iso_urls.uniq.each do |iso_url|
         puts Rainbow("Checking if #{iso_url} is available...").green
