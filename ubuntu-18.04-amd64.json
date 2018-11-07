@@ -106,6 +106,6 @@
     "ssh_password": "vagrant",
     "ssh_username": "vagrant",
     "ssh_timeout": "60m",
-    "update": "true",
+    "update": "true"
   }
 }
