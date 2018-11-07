@@ -3,7 +3,7 @@
     "type": "qemu",
     "iso_urls": [
       "{{ user `iso_path` }}/{{ user `iso_name` }}",
-      "{{user `mirror`}}/7/isos/x86_64/{{ user `iso_name` }}"
+      "{{ user `mirror`}}/7/isos/x86_64/{{ user `iso_name` }}"
     ],
     "iso_checksum": "{{user `iso_checksum`}}",
     "iso_checksum_type": "{{user `iso_checksum_type`}}",
@@ -32,7 +32,7 @@
     "guest_os_type": "RedHat_64",
     "iso_urls": [
       "{{ user `iso_path` }}/{{ user `iso_name` }}",
-      "{{user `mirror`}}/7/isos/x86_64/{{ user `iso_name` }}"
+      "{{ user `mirror`}}/7/isos/x86_64/{{ user `iso_name` }}"
     ],
     "iso_checksum": "{{user `iso_checksum`}}",
     "iso_checksum_type": "{{user `iso_checksum_type`}}",
@@ -62,7 +62,7 @@
     "guest_os_type": "centos-64",
     "iso_urls": [
       "{{ user `iso_path` }}/{{ user `iso_name` }}",
-      "{{user `mirror`}}/7/isos/x86_64/{{ user `iso_name` }}"
+      "{{ user `mirror`}}/7/isos/x86_64/{{ user `iso_name` }}"
     ],
     "iso_checksum": "{{user `iso_checksum`}}",
     "iso_checksum_type": "{{user `iso_checksum_type`}}",
