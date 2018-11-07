@@ -33,8 +33,9 @@ namespace :packer do
     Pathname.glob('*.json').sort.each do |template|
       json = JSON.parse(template.read)
       mirror = json['variables']['mirror']
+      iso = json['variables']['iso_name']
       iso_urls = json['builders'].map do |builder|
-        builder['iso_url'].sub('{{user `mirror`}}', mirror)
+        builder['iso_urls'].at(1).sub('{{ user `mirror` }}', mirror).sub('{{ user `iso_name` }}', iso)
       end
       iso_urls.uniq.each do |iso_url|
         puts Rainbow("Checking if #{iso_url} is available...").green

@@ -1,7 +1,10 @@
 {
   "builders": [{
     "type": "qemu",
-    "iso_url": "{{user `mirror`}}/7/isos/x86_64/CentOS-7-x86_64-NetInstall-1804.iso",
+    "iso_urls": [
+      "{{ user `iso_path` }}/{{ user `iso_name` }}",
+      "{{ user `mirror` }}/7/isos/x86_64/{{ user `iso_name` }}"
+    ],
     "iso_checksum": "{{user `iso_checksum`}}",
     "iso_checksum_type": "{{user `iso_checksum_type`}}",
     "output_directory": "output-centos-7.4-x86_64-{{build_type}}",
@@ -17,8 +20,8 @@
       "<enter>"
     ],
     "ssh_timeout": "{{user `ssh_timeout`}}",
-    "ssh_username": "vagrant",
-    "ssh_password": "vagrant",
+    "ssh_username": "{{ user `ssh_username` }}",
+    "ssh_password": "{{ user `ssh_password` }}",
     "shutdown_command": "sudo systemctl poweroff",
     "qemuargs": [
       ["-m", "{{user `memory`}}"],
@@ -27,7 +30,10 @@
   }, {
     "type": "virtualbox-iso",
     "guest_os_type": "RedHat_64",
-    "iso_url": "{{user `mirror`}}/7/isos/x86_64/CentOS-7-x86_64-NetInstall-1804.iso",
+    "iso_urls": [
+      "{{ user `iso_path` }}/{{ user `iso_name` }}",
+      "{{ user `mirror` }}/7/isos/x86_64/{{ user `iso_name` }}"
+    ],
     "iso_checksum": "{{user `iso_checksum`}}",
     "iso_checksum_type": "{{user `iso_checksum_type`}}",
     "output_directory": "output-centos-7.4-x86_64-{{build_type}}",
@@ -43,8 +49,8 @@
       "<enter>"
     ],
     "ssh_timeout": "{{user `ssh_timeout`}}",
-    "ssh_username": "vagrant",
-    "ssh_password": "vagrant",
+    "ssh_username": "{{ user `ssh_username` }}",
+    "ssh_password": "{{ user `ssh_password` }}",
     "shutdown_command": "sudo systemctl poweroff",
     "vboxmanage": [
       ["modifyvm", "{{.Name}}", "--memory", "{{user `memory`}}"],
@@ -54,7 +60,10 @@
   }, {
     "type": "vmware-iso",
     "guest_os_type": "centos-64",
-    "iso_url": "{{user `mirror`}}/7/isos/x86_64/CentOS-7-x86_64-NetInstall-1804.iso",
+    "iso_urls": [
+      "{{ user `iso_path` }}/{{ user `iso_name` }}",
+      "{{ user `mirror` }}/7/isos/x86_64/{{ user `iso_name` }}"
+    ],
     "iso_checksum": "{{user `iso_checksum`}}",
     "iso_checksum_type": "{{user `iso_checksum_type`}}",
     "output_directory": "output-centos-7.4-x86_64-{{build_type}}",
@@ -70,8 +79,8 @@
       "<enter>"
     ],
     "ssh_timeout": "{{user `ssh_timeout`}}",
-    "ssh_username": "vagrant",
-    "ssh_password": "vagrant",
+    "ssh_username": "{{ user `ssh_username` }}",
+    "ssh_password": "{{ user `ssh_password` }}",
     "tools_upload_flavor": "linux",
     "shutdown_command": "sudo systemctl poweroff",
     "vmx_data": {
@@ -117,12 +126,17 @@
   "variables": {
     "compression_level": "6",
     "cpus": "1",
-    "disk_size": "40000",
+    "disk_size": "40960",
+    "memory": "512",
     "headless": "false",
     "iso_checksum": "937bf0a7b0932817f84f7230f15ed88911bbbd85c0c958680792b7f8d8f9c1a9",
     "iso_checksum_type": "sha256",
-    "memory": "512",
+    "iso_name": "CentOS-7-x86_64-NetInstall-1804.iso",
+    "iso_path": "iso",
     "mirror": "http://mirrors.kernel.org/centos",
+    "ssh_fullname": "vagrant",
+    "ssh_password": "vagrant",
+    "ssh_username": "vagrant",
     "ssh_timeout": "60m"
   }
 }
