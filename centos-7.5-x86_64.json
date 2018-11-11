@@ -58,6 +58,8 @@
     ],
     "export_opts":
     [
+      "--manifest",
+      "--vsys", "0",
       "--product", "LibreNMS",
       "--producturl", "https://www.librenms.org",
       "--description", "LibreNMS, a fully featured network monitoring system that provides a wealth of features and device support.",
