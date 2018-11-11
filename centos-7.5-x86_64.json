@@ -56,6 +56,14 @@
       ["modifyvm", "{{.Name}}", "--memory", "{{user `memory`}}"],
       ["modifyvm", "{{.Name}}", "--cpus", "{{user `cpus`}}"]
     ],
+    "export_opts":
+    [
+      "--product", "LibreNMS",
+      "--producturl", "https://www.librenms.org",
+      "--description", "LibreNMS, a fully featured network monitoring system that provides a wealth of features and device support.",
+      "--version", "LibreNMS",
+      "--eula", "GPLv3"
+    ],
     "format": "ova"
   }, {
     "type": "vmware-iso",
