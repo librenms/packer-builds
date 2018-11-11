@@ -45,6 +45,14 @@
     "virtualbox_version_file": ".vbox_version",
     "output_directory": "output-ubuntu-18.04-amd64-{{build_type}}",
     "vm_name": "librenms-ubuntu-18.04-amd64",
+    "export_opts":
+    [
+      "--product", "LibreNMS",
+      "--producturl", "https://www.librenms.org",
+      "--description", "LibreNMS, a fully featured network monitoring system that provides a wealth of features and device support.",
+      "--version", "LibreNMS",
+      "--eula", "GPLv3"
+    ],
     "format": "ova"
   }],
   "provisioners": [
