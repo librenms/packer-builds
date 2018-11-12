@@ -112,9 +112,9 @@
     "memory": "512",
     "no_proxy": "{{env `no_proxy`}}",
     "hostname": "librenms",
-    "ssh_fullname": "vagrant",
-    "ssh_password": "vagrant",
-    "ssh_username": "vagrant",
+    "ssh_fullname": "LibreNMS",
+    "ssh_password": "CDne3fwdfds",
+    "ssh_username": "librenms",
     "ssh_timeout": "60m",
     "update": "true"
   }
