@@ -52,8 +52,7 @@
       "--product", "LibreNMS",
       "--producturl", "https://www.librenms.org",
       "--description", "LibreNMS, a fully featured network monitoring system that provides a wealth of features and device support.",
-      "--version", "LibreNMS",
-      "--eula", "GPLv3"
+      "--version", "LibreNMS"
     ],
     "format": "ova"
   }],
@@ -92,6 +91,7 @@
       "scripts/ubuntu/syslog-ng.sh",
       "scripts/ubuntu/oxidized.sh",
       "scripts/ubuntu/cleanup.sh",
+      "scripts/common/finish.sh",
       "scripts/ubuntu/minimize.sh"
     ]
   }],
