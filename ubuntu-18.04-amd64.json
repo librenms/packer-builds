@@ -40,7 +40,9 @@
       ["modifyvm", "{{.Name}}", "--vram", "12"],
       ["modifyvm", "{{.Name}}", "--vrde", "off"],
       ["modifyvm", "{{.Name}}", "--memory", "{{ user `memory` }}"],
-      ["modifyvm", "{{.Name}}", "--cpus", "{{ user `cpus` }}"]
+      ["modifyvm", "{{.Name}}", "--cpus", "{{ user `cpus` }}"],
+      [ "modifyvm", "{{.Name}}", "--natpf1", "ssh,tcp,,2023,,22" ],
+      [ "modifyvm", "{{.Name}}", "--natpf1", "http,tcp,,8080,,80" ]
     ],
     "virtualbox_version_file": ".vbox_version",
     "output_directory": "output-ubuntu-18.04-amd64-{{build_type}}",

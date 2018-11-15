@@ -73,10 +73,10 @@ allow httpd_t self:capability net_raw;
 allow httpd_t self:rawip_socket { getopt create setopt write read };
 EOF'
 
-sudo checkmodule -M -m -o http_fping.mod /tmp/http_fping.tt
-sudo semodule_package -o http_fping.pp -m http_fping.mod
-sudo semodule -i http_fping.pp
-sudo rm -f /tmp/http_fping.tt
+sudo checkmodule -M -m -o /tmp/http_fping.mod /tmp/http_fping.tt
+sudo semodule_package -o /tmp/http_fping.pp -m /tmp/http_fping.mod
+sudo semodule -i /tmp/http_fping.pp
+sudo rm -f /tmp/http_fping.tt /tmp/http_fping.pp /tmp/http_fping.mod
 
 sudo firewall-cmd --zone public --add-service http
 sudo firewall-cmd --permanent --zone public --add-service http
@@ -116,7 +116,6 @@ sudo bash -c 'cat << EOF > /etc/my.cnf.d/server.cnf
 [server]
 innodb_file_per_table=1
 lower_case_table_names=0
-sql-mode=""
 EOF'
 
 sudo systemctl restart mariadb
@@ -138,8 +137,12 @@ sudo bash -c "echo '\$config[\"fping\"] = \"/usr/sbin/fping\";' >> /opt/librenms
 sudo bash -c "echo '\$config[\"rrdcached\"] = \"unix:/var/run/rrdcached/rrdcached.sock\";' >> /opt/librenms/config.php"
 sudo bash -c "echo '\$config[\"update_channel\"] = \"release\";' >> /opt/librenms/config.php"
 
-sudo rm /etc/snmp/snmpd.conf
-sudo bash -c "echo 'rocommunity public 127.0.0.1' > /etc/snmp/snmpd.conf"
+sudo bash -c 'cat <<EOF > /etc/snmp/snmpd.conf
+rocommunity public 127.0.0.1
+extend distro /usr/bin/distro
+extend hardware "/bin/cat /sys/devices/virtual/dmi/id/product_name"
+extend manufacturer "/bin/cat /sys/devices/virtual/dmi/id/sys_vendor"
+EOF'
 sudo curl -o /usr/bin/distro https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/distro
 sudo chmod +x /usr/bin/distro
 sudo systemctl restart snmpd
@@ -153,6 +156,7 @@ sudo /usr/bin/php /opt/librenms/adduser.php librenms D32fwefwef 10
 
 sudo git clone https://github.com/librenms-plugins/Weathermap.git /opt/librenms/html/plugins/Weathermap/
 echo "INSERT INTO plugins SET plugin_name = 'Weathermap', plugin_active = 1;" | mysql -u root librenms
+chcon -R -t httpd_cache_t /opt/librenms/html/plugins/Weathermap/
 
 sudo cp /opt/librenms/librenms.nonroot.cron /etc/cron.d/librenms
 
