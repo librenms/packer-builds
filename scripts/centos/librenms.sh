@@ -9,6 +9,8 @@ sudo yum update -y
 sudo rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
 sudo yum install -y composer cronie fping git ImageMagick jwhois mariadb mariadb-server mtr MySQL-python net-snmp net-snmp-utils nginx nmap php72w php72w-cli php72w-common php72w-curl php72w-fpm php72w-gd php72w-mbstring php72w-mysqlnd php72w-process php72w-snmp php72w-xml php72w-zip python-memcached rrdtool libargon2
 
+sudo useradd librenms -d /opt/librenms -M -r
+sudo echo "CDne3fwdfds" | sudo passwd --stdin librenms
 sudo usermod -a -G librenms nginx
 
 sudo bash -c 'cat <<EOF > /etc/sudoers.d/librenms

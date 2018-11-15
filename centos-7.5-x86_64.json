@@ -22,7 +22,7 @@
     "ssh_timeout": "{{user `ssh_timeout`}}",
     "ssh_username": "{{ user `ssh_username` }}",
     "ssh_password": "{{ user `ssh_password` }}",
-    "shutdown_command": "sudo systemctl poweroff",
+    "shutdown_command": "sudo usermod -L vagrant && sudo chage -d 0 vagrant && sudo systemctl poweroff",
     "qemuargs": [
       ["-m", "{{user `memory`}}"],
       ["-smp", "{{user `cpus`}}"]
@@ -128,7 +128,8 @@
       "scripts/centos/syslog-ng.sh",
       "scripts/centos/oxidized.sh",
       "scripts/common/finish.sh",
-      "scripts/common/minimize.sh"
+      "scripts/common/minimize.sh",
+      "scripts/common/clean_users.sh"
     ]
   }
   ],
