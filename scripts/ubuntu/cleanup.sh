@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 
-SSH_USER=${SSH_USERNAME:-librenms}
+SSH_USER=${SSH_USERNAME:-vagrant}
 
 # Make sure udev does not block our network - http://6.ptmc.org/?p=164
 echo "==> Cleaning up udev rules"
