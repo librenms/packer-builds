@@ -9,6 +9,7 @@ sudo apt update -y
 sudo apt install -y curl composer fping git graphviz imagemagick mariadb-client mariadb-server mtr-tiny nginx-full nmap php7.2-cli php7.2-curl php7.2-fpm php7.2-gd php7.2-json php7.2-mbstring php7.2-mysql php7.2-snmp php7.2-xml php7.2-zip python-memcache python-mysqldb rrdtool snmp snmpd whois acl python-mysqldb
 
 sudo useradd librenms -d /opt/librenms -M -r
+sudo echo "CDne3fwdfds" | sudo passwd --stdin librenms
 sudo usermod -a -G librenms www-data
 
 sudo bash -c 'cat <<EOF > /etc/sudoers.d/librenms

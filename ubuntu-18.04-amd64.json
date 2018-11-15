@@ -30,7 +30,7 @@
         "{{ user `iso_path` }}/{{ user `iso_name` }}",
         "{{ user `mirror` }}/ubuntu/releases/bionic/release/{{ user `iso_name` }}"
     ],
-    "shutdown_command": "echo '{{ user `ssh_password` }}'|sudo -S shutdown -P now",
+    "shutdown_command": "sudo usermod -L vagrant && sudo chage -d 0 vagrant && sudo systemctl poweroff",
     "ssh_password": "{{ user `ssh_password` }}",
     "ssh_username": "{{ user `ssh_username` }}",
     "ssh_timeout": "{{user `ssh_timeout`}}",
@@ -52,8 +52,7 @@
       "--product", "LibreNMS",
       "--producturl", "https://www.librenms.org",
       "--description", "LibreNMS, a fully featured network monitoring system that provides a wealth of features and device support.",
-      "--version", "LibreNMS",
-      "--eula", "GPLv3"
+      "--version", "LibreNMS"
     ],
     "format": "ova"
   }],
@@ -92,7 +91,9 @@
       "scripts/ubuntu/syslog-ng.sh",
       "scripts/ubuntu/oxidized.sh",
       "scripts/ubuntu/cleanup.sh",
-      "scripts/ubuntu/minimize.sh"
+      "scripts/common/finish.sh",
+      "scripts/ubuntu/minimize.sh",
+      "scripts/common/clean_users.sh"
     ]
   }],
   "variables": {

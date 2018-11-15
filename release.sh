@@ -17,7 +17,7 @@ for FILE in $FILES; do
 done
 
 echo "Please enter your GitHub personal access token (we don't save it):"
-read TOKEN
+read -s TOKEN
 
 LATEST_TAG=$($CURL -s https://api.github.com/repos/librenms/librenms/releases/latest | $JQ -r ".tag_name")
 
