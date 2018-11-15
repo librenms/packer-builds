@@ -156,7 +156,7 @@ sudo /usr/bin/php /opt/librenms/adduser.php librenms D32fwefwef 10
 
 sudo git clone https://github.com/librenms-plugins/Weathermap.git /opt/librenms/html/plugins/Weathermap/
 echo "INSERT INTO plugins SET plugin_name = 'Weathermap', plugin_active = 1;" | mysql -u root librenms
-chcon -R -t httpd_cache_t /opt/librenms/html/plugins/Weathermap/
+sudo chcon -R -t httpd_cache_t /opt/librenms/html/plugins/Weathermap/
 
 sudo cp /opt/librenms/librenms.nonroot.cron /etc/cron.d/librenms
 
