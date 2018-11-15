@@ -74,7 +74,6 @@ sudo bash -c 'cat << EOF > /etc/mysql/mariadb.conf.d/50-server.cnf
 [server]
 innodb_file_per_table=1
 lower_case_table_names=0
-sql-mode=""
 EOF'
 
 sudo systemctl enable mysql
@@ -95,8 +94,12 @@ sudo sed -i "s/PASSWORD/${mysql_pass}/g" /opt/librenms/config.php
 sudo bash -c "echo '\$config[\"rrdcached\"] = \"unix:/var/run/rrdcached/rrdcached.sock\";' >> /opt/librenms/config.php"
 sudo bash -c "echo '\$config[\"update_channel\"] = \"release\";' >> /opt/librenms/config.php"
 
-sudo rm /etc/snmp/snmpd.conf
-sudo bash -c "echo 'rocommunity public 127.0.0.1' > /etc/snmp/snmpd.conf"
+sudo bash -c 'cat <<EOF > /etc/snmp/snmpd.conf
+rocommunity public 127.0.0.1
+extend distro /usr/bin/distro
+extend hardware "/bin/cat /sys/devices/virtual/dmi/id/product_name"
+extend manufacturer "/bin/cat /sys/devices/virtual/dmi/id/sys_vendor"
+EOF'
 sudo curl -o /usr/bin/distro https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/distro
 sudo chmod +x /usr/bin/distro
 sudo systemctl restart snmpd
