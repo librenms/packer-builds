@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 
-SSH_USER=${SSH_USERNAME:-librenms}
+SSH_USER=${SSH_USERNAME:-vagrant}
 
 if [[ $PACKER_BUILDER_TYPE =~ virtualbox ]]; then
     echo "==> Installing VirtualBox guest additions"
