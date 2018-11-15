@@ -8,8 +8,10 @@ sudo add-apt-repository universe
 sudo apt update -y
 sudo apt install -y curl composer fping git graphviz imagemagick mariadb-client mariadb-server mtr-tiny nginx-full nmap php7.2-cli php7.2-curl php7.2-fpm php7.2-gd php7.2-json php7.2-mbstring php7.2-mysql php7.2-snmp php7.2-xml php7.2-zip python-memcache python-mysqldb rrdtool snmp snmpd whois acl python-mysqldb
 
-sudo useradd librenms -d /opt/librenms -M -r
-sudo echo "CDne3fwdfds" | sudo passwd --stdin librenms
+sudo sh -c "cd /opt; composer create-project --no-dev --keep-vcs librenms/librenms:$LIBRENMS_VERSION librenms dev-master"
+
+sudo useradd librenms -d /opt/librenms
+echo "librenms:CDne3fwdfds" | sudo chpasswd
 sudo usermod -a -G librenms www-data
 
 sudo bash -c 'cat <<EOF > /etc/sudoers.d/librenms
@@ -18,8 +20,6 @@ librenms ALL=(ALL) NOPASSWD: ALL
 EOF'
 
 sudo chmod 440 /etc/sudoers.d/librenms
-
-sudo sh -c "cd /opt; composer create-project --no-dev --keep-vcs librenms/librenms:$LIBRENMS_VERSION librenms dev-master"
 
 # Change php to UTC TZ
 sudo sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php/7.2/fpm/php.ini
@@ -108,6 +108,7 @@ sudo systemctl restart snmpd
 sudo systemctl enable snmpd
 
 sudo cp /opt/librenms/librenms.nonroot.cron /etc/cron.d/librenms
+sudo sed -i "s/16/4/g" /etc/cron.d/librenms
 
 sudo /usr/bin/php /opt/librenms/build-base.php
 sudo /usr/bin/php /opt/librenms/addhost.php localhost public v2c
@@ -115,13 +116,10 @@ sudo /usr/bin/php /opt/librenms/adduser.php librenms D32fwefwef 10
 
 sudo git clone https://github.com/librenms-plugins/Weathermap.git /opt/librenms/html/plugins/Weathermap/
 echo "INSERT INTO plugins SET plugin_name = 'Weathermap', plugin_active = 1;" | mysql -u root librenms
-
-sudo cp /opt/librenms/librenms.nonroot.cron /etc/cron.d/librenms
-
 sudo bash -c "echo '*/5 * * * * librenms /opt/librenms/html/plugins/Weathermap/map-poller.php >> /dev/null 2>&1' >> /etc/cron.d/librenms"
+sudo chmod -R g+w /opt/librenms/html/plugins/Weathermap/configs/
 
-sudo sed -i "s/16/4/g" /etc/cron.d/librenms
 
 sudo chown -R librenms:librenms /opt/librenms
-#sudo setfacl -d -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
-#sudo setfacl -R -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
+sudo setfacl -d -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
+sudo chmod -R ug=rwX /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
