@@ -1,6 +1,6 @@
 #!/bin/bash -eux
 
-if [ -z "$LIBRENMS_VERSION"]; then
+if [[ -z "$LIBRENMS_VERSION" ]]; then
   LIBRENMS_VERSION="master"
 fi
 
@@ -9,9 +9,13 @@ sudo yum update -y
 sudo rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
 sudo yum install -y composer cronie fping git ImageMagick jwhois mariadb mariadb-server mtr MySQL-python net-snmp net-snmp-utils nginx nmap php72w php72w-cli php72w-common php72w-curl php72w-fpm php72w-gd php72w-mbstring php72w-mysqlnd php72w-process php72w-snmp php72w-xml php72w-zip python-memcached rrdtool libargon2
 
-sudo useradd librenms -d /opt/librenms -M -r
-sudo echo "CDne3fwdfds" | sudo passwd --stdin librenms
+sudo sh -c "cd /opt; composer create-project --no-dev --keep-vcs librenms/librenms=$LIBRENMS_VERSION librenms"
+
+
+sudo useradd librenms -d /opt/librenms -M -r /bin/bash
+echo "librenms:CDne3fwdfds" | sudo chpasswd
 sudo usermod -a -G librenms nginx
+sudo cp -r /etc/skel/. /opt/librenms
 
 sudo bash -c 'cat <<EOF > /etc/sudoers.d/librenms
 Defaults:librenms !requiretty
@@ -19,8 +23,6 @@ librenms ALL=(ALL) NOPASSWD: ALL
 EOF'
 
 sudo chmod 440 /etc/sudoers.d/librenms
-
-sudo sh -c "cd /opt; composer create-project --no-dev --keep-vcs librenms/librenms:$LIBRENMS_VERSION librenms dev-master"
 
 # Change php to UTC TZ
 sudo sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php.ini
@@ -149,6 +151,7 @@ sudo systemctl restart snmpd
 sudo systemctl enable snmpd
 
 sudo cp /opt/librenms/librenms.nonroot.cron /etc/cron.d/librenms
+sudo sed -i "s/16/4/g" /etc/cron.d/librenms
 
 sudo /usr/bin/php /opt/librenms/build-base.php
 sudo /usr/bin/php /opt/librenms/addhost.php localhost public v2c
@@ -156,14 +159,11 @@ sudo /usr/bin/php /opt/librenms/adduser.php librenms D32fwefwef 10
 
 sudo git clone https://github.com/librenms-plugins/Weathermap.git /opt/librenms/html/plugins/Weathermap/
 echo "INSERT INTO plugins SET plugin_name = 'Weathermap', plugin_active = 1;" | mysql -u root librenms
-sudo chcon -R -t httpd_cache_t /opt/librenms/html/plugins/Weathermap/
-
-sudo cp /opt/librenms/librenms.nonroot.cron /etc/cron.d/librenms
-
 sudo bash -c "echo '*/5 * * * * librenms /opt/librenms/html/plugins/Weathermap/map-poller.php >> /dev/null 2>&1' >> /etc/cron.d/librenms"
+sudo chcon -R -t httpd_cache_t /opt/librenms/html/plugins/Weathermap/
+sudo chmod -R g+w /opt/librenms/html/plugins/Weathermap/configs/
 
-sudo sed -i "s/16/4/g" /etc/cron.d/librenms
 
 sudo chown -R librenms:librenms /opt/librenms
 sudo setfacl -d -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
-sudo setfacl -R -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
+sudo chmod -R ug=rwX /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/

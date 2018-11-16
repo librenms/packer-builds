@@ -1,6 +1,6 @@
 #!/bin/bash -eux
 
-if [ "$SYSLOG_NG" == false ]; then
+if [[ "$SYSLOG_NG" == false ]]; then
     echo "Syslog-ng support disabled"
     exit 0
 fi
