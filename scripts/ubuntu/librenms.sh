@@ -1,6 +1,6 @@
 #!/bin/bash -eux
 
-if [ -z "$LIBRENMS_VERSION"]; then
+if [[ -z "$LIBRENMS_VERSION" ]]; then
   LIBRENMS_VERSION="master"
 fi
 
@@ -8,7 +8,7 @@ sudo add-apt-repository universe
 sudo apt update -y
 sudo apt install -y curl composer fping git graphviz imagemagick mariadb-client mariadb-server mtr-tiny nginx-full nmap php7.2-cli php7.2-curl php7.2-fpm php7.2-gd php7.2-json php7.2-mbstring php7.2-mysql php7.2-snmp php7.2-xml php7.2-zip python-memcache python-mysqldb rrdtool snmp snmpd whois acl python-mysqldb
 
-sudo sh -c "cd /opt; composer create-project --no-dev --keep-vcs librenms/librenms:$LIBRENMS_VERSION librenms dev-master"
+sudo sh -c "cd /opt; composer create-project --no-dev --keep-vcs librenms/librenms=$LIBRENMS_VERSION librenms"
 
 sudo useradd librenms -d /opt/librenms -M -r /bin/bash
 echo "librenms:CDne3fwdfds" | sudo chpasswd
