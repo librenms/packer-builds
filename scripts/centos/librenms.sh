@@ -11,9 +11,11 @@ sudo yum install -y composer cronie fping git ImageMagick jwhois mariadb mariadb
 
 sudo sh -c "cd /opt; composer create-project --no-dev --keep-vcs librenms/librenms:$LIBRENMS_VERSION librenms dev-master"
 
-sudo useradd librenms -d /opt/librenms
+
+sudo useradd librenms -d /opt/librenms -M -r /bin/bash
 echo "librenms:CDne3fwdfds" | sudo chpasswd
 sudo usermod -a -G librenms nginx
+sudo cp -r /etc/skel/. /opt/librenms
 
 sudo bash -c 'cat <<EOF > /etc/sudoers.d/librenms
 Defaults:librenms !requiretty
@@ -162,6 +164,6 @@ sudo chcon -R -t httpd_cache_t /opt/librenms/html/plugins/Weathermap/
 sudo chmod -R g+w /opt/librenms/html/plugins/Weathermap/configs/
 
 
-sudo chown -R murrant:librenms /opt/librenms
+sudo chown -R librenms:librenms /opt/librenms
 sudo setfacl -d -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
 sudo chmod -R ug=rwX /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
