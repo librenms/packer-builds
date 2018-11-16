@@ -1,6 +1,6 @@
 #!/bin/bash -eux
 
-if [ "$OXIDIZED" == false ]; then
+if [[ "$OXIDIZED" == false ]]; then
     echo "Oxidized support disabled"
     exit 0
 fi
