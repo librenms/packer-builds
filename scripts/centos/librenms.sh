@@ -1,6 +1,6 @@
 #!/bin/bash -eux
 
-if [ -z "$LIBRENMS_VERSION"]; then
+if [[ -z "$LIBRENMS_VERSION" ]]; then
   LIBRENMS_VERSION="master"
 fi
 
