@@ -1,6 +1,6 @@
 #!/bin/bash -eux
 
-if [[ "$OXIDIZED" == false ]]; then
+if [ "$OXIDIZED" == false ]; then
     echo "Oxidized support disabled"
     exit 0
 fi
@@ -9,6 +9,10 @@ sudo yum install -y make cmake which sqlite-devel openssl-devel libssh2-devel ru
 sudo git clone https://github.com/ytti/oxidized.git /opt/oxidized/
 sudo gem install bundler
 sudo sh -c "(cd /opt/oxidized && rake install)"
+sudo git clone https://github.com/ytti/oxidized-web.git /opt/oxidized-web/
+sudo sh -c "(cd /opt/oxidized-web && rake install)"
+sudo git clone https://github.com/ytti/oxidized-script.git /opt/oxidized-script/
+sudo sh -c "(cd /opt/oxidized-script && rake install)"
 sudo useradd oxidized
 sudo bash -c 'cat << EOF > /etc/systemd/system/oxidized.service
 [Unit]

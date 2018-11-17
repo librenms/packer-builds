@@ -10,7 +10,7 @@ sudo apt install -y curl composer fping git graphviz imagemagick mariadb-client 
 
 sudo sh -c "cd /opt; composer create-project --no-dev --keep-vcs librenms/librenms=$LIBRENMS_VERSION librenms"
 
-sudo useradd librenms -d /opt/librenms -M -r /bin/bash
+sudo useradd librenms -d /opt/librenms -M -s /bin/bash
 echo "librenms:CDne3fwdfds" | sudo chpasswd
 sudo usermod -a -G librenms www-data
 sudo cp -r /etc/skel/. /opt/librenms

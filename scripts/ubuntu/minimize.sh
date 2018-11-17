@@ -38,13 +38,6 @@ apt-get -y purge nano
 apt-get -y autoremove --purge
 apt-get -y clean
 
-# Clean up orphaned packages with deborphan
-apt-get -y install deborphan
-while [ -n "$(deborphan --guess-all --libdevel)" ]; do
-    deborphan --guess-all --libdevel | xargs apt-get -y purge
-done
-apt-get -y purge deborphan dialog
-
 echo "==> Removing man pages"
 rm -rf /usr/share/man/*
 echo "==> Removing APT files"
