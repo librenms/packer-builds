@@ -42,7 +42,7 @@ done
 
 echo "Creating new release $LATEST_TAG"
 
-UPLOAD_URL=$($CURL -s https://api.github.com/repos/librenms/packer-templates/releases -H "Authorization: token $TOKEN" -X POST --header "Content-Type: application/json" -d "{\"tag_name\":\"$LATEST_TAG\",\"name\":\"v$LATEST_TAG\"}" | $JQ -r ".upload_url")
+UPLOAD_URL=$($CURL -s https://api.github.com/repos/librenms/packer-builds/releases -H "Authorization: token $TOKEN" -X POST --header "Content-Type: application/json" -d "{\"tag_name\":\"$LATEST_TAG\",\"name\":\"v$LATEST_TAG\"}" | $JQ -r ".upload_url")
 UPLOAD_URL="${UPLOAD_URL//\{\?name,label\}/}"
 FILES=$($FIND ./output-* -type f -print)
 for FILE in $FILES; do
