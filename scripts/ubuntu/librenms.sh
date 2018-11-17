@@ -124,3 +124,4 @@ sudo chmod -R g+w /opt/librenms/html/plugins/Weathermap/configs/
 sudo chown -R librenms:librenms /opt/librenms
 sudo setfacl -d -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
 sudo chmod -R ug=rwX /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
+sudo su - librenms -c "git checkout ."
