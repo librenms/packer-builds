@@ -5,8 +5,13 @@ rvm:
 env:
   global:
     - PACKER_VERSION=1.2.2
+    - PACKER_CACHE_DIR=/home/travis/packer_cache
     - IMAGES=centos-7.5-x86_64;ubuntu-18.04-amd64
     - BUILDERS=virtualbox-iso
+
+cache:
+  directories:
+    - /home/travis/packer_cache/
 
 before_install:
   - sudo echo "deb http://download.virtualbox.org/virtualbox/debian precise contrib" | sudo tee -a /etc/apt/sources.list
