@@ -6,8 +6,17 @@ env:
   global:
     - PACKER_VERSION=1.2.2
     - PACKER_CACHE_DIR=/home/travis/packer_cache
-    - IMAGES=centos-7.5-x86_64;ubuntu-18.04-amd64
-    - BUILDERS=virtualbox-iso
+
+matrix:
+  include:
+    - name: "centos-7.5-x86_64"
+      env:
+        - IMAGES="centos-7.5-x86_64"
+        - BUILDERS="virtualbox-iso"
+    - name: "ubuntu-18.04-amd64"
+      env:
+        - IMAGES="ubuntu-18.04-amd64"
+        - BUILDERS="virtualbox-iso"
 
 cache:
   directories:
