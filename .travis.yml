@@ -10,7 +10,7 @@ env:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install -y -q curl jq
+  - sudo apt-get install -y -q curl jq virtualbox --fix-missing
   - curl -sLo packer.zip https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip
   - unzip -d bin packer.zip
   - export PATH=$(pwd)/bin:$PATH
