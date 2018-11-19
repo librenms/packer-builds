@@ -3,13 +3,13 @@
 IMAGES=$(echo ${IMAGES:-"centos-7.5-x86_64;ubuntu-18.04-amd64"} | tr ';' '\n')
 BUILDERS=$(echo ${BUILDERS:-"virtualbox-iso"} | tr ';' '\n')
 RE='^[0-9]+([.][0-9]+)?$'
-#LATEST_TAG=1.45
+LATEST_TAG=$(curl -s https://api.github.com/repos/librenms/librenms/releases/latest | jq -r ".tag_name")
 
 echo "Removing old files"
 rm -rf ./build/*
 
 if ! [[ "$LATEST_TAG" =~ $RE ]] ; then
-    echo "Tag not found"; exit 1;
+    echo "Tag '$LATEST_TAG' not found"; exit 1;
 fi
 
 echo "Building images for $LATEST_TAG tag"

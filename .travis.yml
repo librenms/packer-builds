@@ -20,7 +20,6 @@ install:
 
 script:
   - bundle exec rake
-  - export LATEST_TAG=$(curl -s https://api.github.com/repos/librenms/librenms/releases/latest | jq -r ".tag_name")
   - bash -e build.sh
 
 deploy:
