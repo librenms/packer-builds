@@ -9,8 +9,12 @@ env:
     - BUILDERS=virtualbox-iso
 
 before_install:
+  - sudo echo "deb http://download.virtualbox.org/virtualbox/debian precise contrib" | sudo tee -a /etc/apt/sources.list
+  - wget http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | sudo apt-key add -
   - sudo apt-get update
-  - sudo apt-get install -y -q curl jq virtualbox --fix-missing
+  - sudo apt-get -y install linux-headers-$(uname -r)
+  - sudo apt-get -y install curl jq virtualbox
+  - VBoxManage -v
   - curl -sLo packer.zip https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip
   - unzip -d bin packer.zip
   - export PATH=$(pwd)/bin:$PATH
