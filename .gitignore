@@ -1,6 +1,6 @@
 *.box
 .bundle/
 .vagrant/
-output-*/
+build/
 packer_cache/
 .DS_Store

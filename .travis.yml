@@ -1,9 +1,35 @@
 language: ruby
 rvm:
   - 2.5
+
+env:
+  global:
+    - PACKER_VERSION=1.2.2
+    - IMAGES=centos-7.5-x86_64;ubuntu-18.04-amd64
+    - BUILDERS=virtualbox-iso
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install -y -q curl jq
+  - curl -sLo packer.zip https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip
+  - unzip -d bin packer.zip
+  - export PATH=$(pwd)/bin:$PATH
+
 install:
   - bundle install
-  - curl -L -o packer.zip https://releases.hashicorp.com/packer/1.2.2/packer_1.2.2_linux_amd64.zip && unzip -d bin packer.zip
+
 script:
-  - PATH=$(pwd)/bin:$PATH bundle exec rake
-  - find . -name \*.sh -exec bash -n {} \;
+  - bundle exec rake
+  - export LATEST_TAG=$(curl -s https://api.github.com/repos/librenms/librenms/releases/latest | jq -r ".tag_name")
+  - bash -e build.sh
+
+deploy:
+  provider: releases
+  api_key:
+    secure: kuKbByubJw3g7el1megLv20UF7EdFuU0jfYAEIx2u7e2beNXROKOYDpbTR+KSzIU62aI+HZq2isSORQ2MHokV8yPbUrcchIF8w814Z7b0rQ0AR/Gb3T0CwswOvRk2nFIbo9ldxWHzgQRhr1x6BZ5ZR/vUESPSwX1WgJG5JcMOXtiNkbF3N5NZicqnWWseCE3wenClTRG5mBv8fx7iYvHi66maWRg4h+To95yT7kiUYv7T63bET4o4ru46EDUWFsGDRMD2uC7i3on+ojyOotNzMsZN4xDtoaFpP3wiaGTm6ImdWKlaYfAxj6FrLI6mCqz2VjjKCmvYtgrOJAw2GfJ7Oy+FPb3M0TJO8+/TFZY4Sci8DoW3iMuL210VkbUsnLFk4rKInY06BVhGFZEa5ytfbXJ16UrIuNcJaUXs41kaYy+O9lWWSwp3n9DrJvQIVyF4Br3q0oFp0gu32aWiZNEqki2WrT702Mis1K46YaWVlITCWuq6smQJ4w4Pwlnvdenr74kA/xWAQ0YWqwnHs3vWUNhGAoE317hidJdvcnGg+woBZMpJY9jjwsddIuKSKNJiX34rE8RFqzizxCYXtS+2y/BtPqBafaZ9CkM6b5xJLIVpf7H2fiW90JegvJWbqa3wx7FgMv9RziLCQlbiQoLvzQ+FOoq1Yukpec4ppIu4j4=
+  file_glob: true
+  file: build/*
+  skip_cleanup: true
+  draft: true
+  on:
+    tags: false
