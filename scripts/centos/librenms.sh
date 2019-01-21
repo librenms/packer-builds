@@ -84,6 +84,10 @@ sudo firewall-cmd --zone public --add-service http
 sudo firewall-cmd --permanent --zone public --add-service http
 sudo firewall-cmd --zone public --add-service https
 sudo firewall-cmd --permanent --zone public --add-service https
+sudo firewall-cmd --zone=public --add-port=514/tcp
+sudo firewall-cmd --permanent --zone=public --add-port=514/tcp
+sudo firewall-cmd --zone=public --add-port=514/udp
+sudo firewall-cmd --permanent --zone=public --add-port=514/udp
 
 sudo mkdir /var/run/rrdcached
 sudo chown librenms:librenms /var/run/rrdcached
