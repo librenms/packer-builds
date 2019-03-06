@@ -3,16 +3,12 @@
 
 Clone the repository:
 
-    $ git clone https://github.com/librenms/packer-templates && cd packer-templates
+    $ git clone https://github.com/librenms/packer-builds && cd packer-builds
 
 Install requirements:
 
-  - packer.io
-  - VirtualBox
-
-Build a machine image from the template in the repository:
-
-    $ packer build -only=virtualbox-iso archlinux-x86_64.json
+  - [packer.io](https://packer.io/downloads.html)
+  - [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads)
 
 ## Configuration
 
@@ -31,7 +27,6 @@ You can configure each template to match your requirements by setting the follow
 
 ### Example
 
-Build a CentOS 7 box with a 4GB hard disk using the VirtualBox provider:
+Build a LibreNMS CentOS 7 (NGINX) box with a 10GB hard disk using the VirtualBox provider:
 
-    $ packer build -only=virtualbox-iso -var disk_size=4000 centos-7.4-x86_64.json
-
+    $ packer build -only=virtualbox-iso -var disk_size=10000 centos-7.5-x86_64.json
