@@ -30,7 +30,7 @@ echo "Tag $LATEST_TAG, found, building images"
 for IMAGE in $IMAGES; do
     for BUILDER in $BUILDERS; do
         echo "Building $IMAGE with $BUILDER"
-        BUILD=$($PACKER build -force -only=$BUILDER -var 'librenms_version=$LATEST_TAG' -var 'headless=true' $IMAGE.json)
+        BUILD=$($PACKER build -force -only=$BUILDER -var "librenms_version=$LATEST_TAG" -var 'headless=true' $IMAGE.json)
         if [ $? != 0 ] ; then
             echo "Build failed:"
             echo $BUILD
