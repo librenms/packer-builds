@@ -29,4 +29,4 @@ You can configure each template to match your requirements by setting the follow
 
 Build a LibreNMS CentOS 7 (NGINX) box with a 10GB hard disk using the VirtualBox provider:
 
-    $ packer build -only=virtualbox-iso -var disk_size=10000 centos-7.5-x86_64.json
+    $ packer build -only=virtualbox-iso -var disk_size=10000 centos-7.6-x86_64.json
