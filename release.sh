@@ -5,7 +5,7 @@ JQ='/usr/bin/env jq'
 PACKER='/usr/bin/env packer'
 RE='^[0-9]+([.][0-9]+)?$'
 FIND='/usr/bin/env find'
-IMAGES="centos-7.5-x86_64
+IMAGES="centos-7.6-x86_64
 ubuntu-18.04-amd64"
 BUILDERS="virtualbox-iso"
 
