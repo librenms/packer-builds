@@ -9,7 +9,7 @@ GEM
     net-telnet (0.1.1)
     rainbow (2.2.2)
       rake
-    rake (12.0.0)
+    rake (12.3.3)
     rspec (3.6.0)
       rspec-core (~> 3.6.0)
       rspec-expectations (~> 3.6.0)
