@@ -77,8 +77,8 @@ lower_case_table_names=0
 innodb_flush_log_at_trx_commit = 2
 EOF'
 
-sudo systemctl enable mysql
-sudo systemctl restart mysql
+sudo systemctl enable mariadb
+sudo systemctl restart mariadb
 
 mysql_pass="D42nf23rewD";
 
@@ -108,6 +108,10 @@ sudo -u librenms /usr/bin/lnms --force -n migrate
 
 sudo -u librenms /usr/bin/lnms -n config:set update_channel release
 sudo -u librenms /usr/bin/lnms -n config:set service_poller_workers 4
+sudo -u librenms /usr/bin/lnms -n config:set show_services 1
+sudo -u librenms /usr/bin/lnms -n config:set service_services_enabled true
+sudo -u librenms /usr/bin/lnms -n config:set enable_billing 1
+
 
 sudo bash -c 'cat <<EOF > /etc/snmp/snmpd.conf
 rocommunity public 127.0.0.1

@@ -153,7 +153,7 @@
     "iso_checksum_type": "sha256",
     "iso_name": "ubuntu-20.04.2-live-server-amd64.iso",
     "iso_path": "iso",
-    "memory": "1024",
+    "memory": "512",
     "mirror": "http://releases.ubuntu.com",
     "no_proxy": "{{env `no_proxy`}}",
     "ssh_fullname": "vagrant",
