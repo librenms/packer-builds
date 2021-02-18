@@ -1,0 +1,14 @@
+#cloud-config
+autoinstall:
+  version: 1
+  identity:
+    hostname: librenms
+    password: $6$p7TmlCd1WIljlXVE$B8Yr1f6eVvQrlE5qsk3dp6heo1YveUdXBzXwYY5bhMlbcyl9rvZtH0AkW1ntiE2jgYA8GEQ4vx/lsjxYNwHuK.
+    username: vagrant
+  storage:
+    layout:
+      name: lvm
+  update: true
+  ssh:
+    install-server: true
+    allow-pw: true

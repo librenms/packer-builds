@@ -63,4 +63,4 @@ EOF'
 
 sudo systemctl enable syslog-ng
 sudo systemctl restart syslog-ng
-sudo bash -c "echo '\$config[\"enable_syslog\"] = 1;' >> /opt/librenms/config.php"
+echo \$config[\'enable_syslog\'] = 1\; | tee -a /opt/librenms/config.php
