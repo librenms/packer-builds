@@ -106,7 +106,8 @@ sed -i '/INSTALL=true/d' /opt/librenms/.env
 # This does all the heavy lifting for the DB!
 sudo -u librenms /usr/bin/lnms --force -n migrate
 
-sudo -u librenms /usr/bin/lsnm -n config:set update_channel release
+sudo -u librenms /usr/bin/lnms -n config:set update_channel release
+sudo -u librenms /usr/bin/lnms -n config:set service_poller_workers 4
 
 sudo bash -c 'cat <<EOF > /etc/snmp/snmpd.conf
 rocommunity public 127.0.0.1
