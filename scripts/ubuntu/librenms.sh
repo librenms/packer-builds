@@ -151,7 +151,7 @@ chmod -R 775 /opt/librenms/html/plugins/Weathermap/configs/
 
 echo '==> Running final cleanup for LibreNMS Application'
 cd /opt/librenms
-sudo -u librenms /opt/librenms/scripts/github-remove
 sudo chown -R librenms:librenms /opt/librenms
 sudo setfacl -d -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
 sudo chmod -R ug=rwX /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
+sudo -u librenms git checkout .

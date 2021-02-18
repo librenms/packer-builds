@@ -1,5 +1,6 @@
 #!/bin/bash -eu
 
+sudo lvextend -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv --resizefs
 # locale
 echo "==> Configuring locales"
 sed -i -e '/^[^# ]/s/^/# /' /etc/locale.gen
