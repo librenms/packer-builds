@@ -61,5 +61,3 @@ df -h
 
 echo '==> Clearing Ubuntu machine-id'
 sudo cp /dev/null /etc/machine-id
-echo '==> Clearing SSH host keys'
-sudo rm -f /etc/ssh/ssh_host_*
