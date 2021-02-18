@@ -160,7 +160,8 @@
     "ssh_password": "vagrant",
     "ssh_timeout": "60m",
     "ssh_username": "vagrant",
-    "update": "true"
+    "update": "true",
+    "librenms_version": "master"
   }
 }
 

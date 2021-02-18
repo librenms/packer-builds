@@ -3,11 +3,13 @@
 if [[ -z "$LIBRENMS_VERSION" ]]; then
   LIBRENMS_VERSION="master"
 fi
-
+echo '==> Aquiring prerequisite packages'
 apt -y install software-properties-common
 add-apt-repository universe
 apt -y update
 apt -y install acl curl composer fping git graphviz imagemagick mariadb-client mariadb-server mtr-tiny nginx-full nmap php7.4-cli php7.4-curl php7.4-fpm php7.4-gd php7.4-json php7.4-mbstring php7.4-mysql php7.4-snmp php7.4-xml php7.4-zip rrdtool snmp snmpd whois unzip python3-pymysql python3-dotenv python3-redis python3-setuptools
+
+echo '==> Downloading LibreNMS'
 
 sudo useradd librenms -d /opt/librenms -M -s /bin/bash
 echo "librenms:CDne3fwdfds" | sudo chpasswd
@@ -27,7 +29,7 @@ setfacl -R -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstra
 cd /opt/librenms
 sudo -u librenms ./scripts/composer_wrapper.php install --no-dev
 
-# Change php to UTC TZ
+echo '==> Configuring PHP'
 sudo sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php/7.4/fpm/php.ini
 sudo sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php/7.4/cli/php.ini
 mv /etc/php/7.4/fpm/pool.d/www.conf /etc/php/7.4/fpm/pool.d/librenms.conf
@@ -37,16 +39,20 @@ sed -i "s|listen = .*|listen = /run/php-fpm-librenms.sock|" /etc/php/7.4/fpm/poo
 systemctl restart php7.4-fpm.service
 systemctl enable php7.4-fpm.service
 
+echo '==> Installing lnms'
 ln -s /opt/librenms/lnms /usr/bin/lnms
 cp /opt/librenms/misc/lnms-completion.bash /etc/bash_completion.d/
 
+echo '==> Configuring nginx'
 sudo cp /tmp/librenms.conf /etc/nginx/conf.d/librenms.conf
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo systemctl enable nginx
 sudo systemctl restart nginx
 
+echo '==> Configuring logrotate'
 sudo cp /opt/librenms/misc/librenms.logrotate /etc/logrotate.d/librenms
 
+echo '==> Installing RRDCached'
 sudo apt install -y rrdcached
 sudo mkdir /var/run/rrdcached
 sudo chown librenms:librenms /var/run/rrdcached
@@ -69,7 +75,7 @@ EOF'
 chown librenms:librenms /var/lib/rrdcached/journal/
 systemctl restart rrdcached.service
 
-
+echo '==> Installing mariadb database'
 sudo bash -c 'cat << EOF > /etc/mysql/mariadb.conf.d/99-librenms.cnf
 [server]
 innodb_file_per_table=1
@@ -88,6 +94,8 @@ echo "CREATE DATABASE librenms CHARACTER SET utf8 COLLATE utf8_unicode_ci;
             IDENTIFIED BY '$mysql_pass';
             FLUSH PRIVILEGES;" | mysql -u root
 
+
+echo '==> Creating base config.php and .env'
 sudo cp /opt/librenms/config.php.default /opt/librenms/config.php
 echo \$config[\'db_host\'] = \'localhost\'\; | tee -a /opt/librenms/config.php
 echo \$config[\'db_user\'] = \'librenms\'\; | tee -a /opt/librenms/config.php
@@ -103,16 +111,17 @@ echo "LIBRENMS_USER=librenms" | tee -a /opt/librenms/.env
 echo "APP_URL=/" | tee -a /opt/librenms/.env
 sed -i '/INSTALL=true/d' /opt/librenms/.env
 
-# This does all the heavy lifting for the DB!
+echo '==> Installing database & setting basic configs'
+
 sudo -u librenms /usr/bin/lnms --force -n migrate
 
-sudo -u librenms /usr/bin/lnms -n config:set update_channel release
+sudo -u librenms /usr/bin/lnms -n config:set update_channel $LIBRENMS_VERSION
 sudo -u librenms /usr/bin/lnms -n config:set service_poller_workers 4
 sudo -u librenms /usr/bin/lnms -n config:set show_services 1
 sudo -u librenms /usr/bin/lnms -n config:set service_services_enabled true
 sudo -u librenms /usr/bin/lnms -n config:set enable_billing 1
 
-
+echo '==> Setting up localhost snmpd'
 sudo bash -c 'cat <<EOF > /etc/snmp/snmpd.conf
 rocommunity public 127.0.0.1
 extend distro /usr/bin/distro
@@ -124,20 +133,25 @@ sudo chmod +x /usr/bin/distro
 sudo systemctl restart snmpd
 sudo systemctl enable snmpd
 
+echo '==> Setting up dispatcher service'
 sudo -u librenms python3 -m pip install --user -r /opt/librenms/requirements.txt
 cp /opt/librenms/misc/librenms.service /etc/systemd/system/librenms.service
 systemctl enable librenms.service
 
+echo '==> Creating first user and device'
 sudo -u librenms /usr/bin/lnms -n user:add -p D32fwefwef -r admin -n librenms
 sudo -u librenms /usr/bin/lnms -n --v2c device:add localhost
 
+echo '==> Installing Weathermap plugin'
 sudo git clone https://github.com/librenms-plugins/Weathermap.git /opt/librenms/html/plugins/Weathermap/
 echo "INSERT INTO plugins SET plugin_name = 'Weathermap', plugin_active = 1;" | mysql -u root librenms
 sudo bash -c "echo '*/5 * * * * librenms /opt/librenms/html/plugins/Weathermap/map-poller.php >> /dev/null 2>&1' >> /etc/cron.d/librenms"
 chown -R librenms:librenms /opt/librenms/html/plugins/Weathermap/
 chmod -R 775 /opt/librenms/html/plugins/Weathermap/configs/
 
-
+echo '==> Running final cleanup for LibreNMS Application'
+cd /opt/librenms
+sudo -u librenms /opt/librenms/scripts/github-remove
 sudo chown -R librenms:librenms /opt/librenms
 sudo setfacl -d -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
 sudo chmod -R ug=rwX /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
