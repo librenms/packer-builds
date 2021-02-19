@@ -4,7 +4,6 @@ if [[ "$OXIDIZED" == false ]]; then
     echo "Oxidized support disabled"
     exit 0
 fi
-
 sudo add-apt-repository universe
 sudo apt install -y ruby ruby-dev libsqlite3-dev libssl-dev pkg-config cmake libssh2-1-dev libicu-dev zlib1g-dev
 sudo gem install oxidized

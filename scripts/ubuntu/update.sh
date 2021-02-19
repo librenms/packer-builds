@@ -1,8 +1,8 @@
 #!/bin/bash -eu
 
+sudo lvextend -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv --resizefs
 # locale
 echo "==> Configuring locales"
-apt-get -y purge language-pack-en language-pack-gnome-en
 sed -i -e '/^[^# ]/s/^/# /' /etc/locale.gen
 LANG=en_US.UTF-8
 LC_ALL=$LANG
@@ -16,27 +16,23 @@ sed -i.bak 's/^Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades
 echo "==> Disabling apt.daily.service"
 systemctl stop apt-daily.timer
 systemctl disable apt-daily.timer
-systemctl mask apt-daily.service
 systemctl daemon-reload
 
 # install packages and upgrade
 echo "==> Updating list of repositories"
-apt-get -y update
+apt -y update
 if [[ $UPDATE  =~ true || $UPDATE =~ 1 || $UPDATE =~ yes ]]; then
-    apt-get -y dist-upgrade
-    apt-get -y autoremove --purge
+    apt -y dist-upgrade
+    apt -y autoremove --purge
 fi
-apt-get -y install build-essential linux-headers-generic
-apt-get -y install ssh nfs-common vim curl perl git
-apt-get -y autoclean
-apt-get -y clean
+apt -y install build-essential linux-headers-generic
+apt -y install ssh nfs-common vim curl perl git
+apt -y autoclean
+apt -y clean
 
 # Remove 5s grub timeout to speed up booting
 sed -i -e 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=0/' \
     -e 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet nosplash"/' \
     /etc/default/grub
 update-grub
-# SSH tweaks
-echo "UseDNS no" >> /etc/ssh/sshd_config
-
 exit 0
