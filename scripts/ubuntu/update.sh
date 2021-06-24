@@ -32,7 +32,9 @@ apt -y clean
 
 # Remove 5s grub timeout to speed up booting
 sed -i -e 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=0/' \
-    -e 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet nosplash"/' \
+    -e 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="nosplash"/' \
+    -e 's/^GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="console=tty1 console=ttyS0,115200"/' \
+    -e 's/^#?GRUB_TERMINAL=.*/GRUB_TERMINAL="console serial"/' \
     /etc/default/grub
 update-grub
 exit 0
