@@ -4,7 +4,7 @@ rvm:
 install:
   - bundle update --bundler
   - bundle install
-  - curl -L -o packer.zip https://releases.hashicorp.com/packer/1.2.2/packer_1.2.2_linux_amd64.zip && unzip -d bin packer.zip
+  - curl -L -o packer.zip https://releases.hashicorp.com/packer/1.7.3/packer_1.7.3_linux_amd64.zip && unzip -d bin packer.zip
 script:
   - PATH=$(pwd)/bin:$PATH bundle exec rake
   - find . -name \*.sh -exec bash -n {} \;
