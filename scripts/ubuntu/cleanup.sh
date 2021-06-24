@@ -48,11 +48,6 @@ if [ "x${swapuuid}" != "x" ]; then
     /sbin/mkswap -U "${swapuuid}" "${swappart}"
 fi
 
-# Zero out the free space to save space in the final image
-dd if=/dev/zero of=/EMPTY bs=1M  || echo "dd exit code $? is suppressed"
-rm -f /EMPTY
-sync
-
 echo "==> Disk usage before cleanup"
 echo ${DISK_USAGE_BEFORE_CLEANUP}
 
