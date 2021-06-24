@@ -30,3 +30,8 @@ You can configure each template to match your requirements by setting the follow
 Build a LibreNMS CentOS 7 (NGINX) box with a 10GB hard disk using the VirtualBox provider:
 
     $ packer build -only=virtualbox-iso -var disk_size=10000 centos-7.6-x86_64.json
+
+If running on a remote system over ssh, or on a system without a graphical
+console, add `-var headless=true`
+
+For debugging, run with `PACKER_LOG=1` and/or check `~/.config/VirtualBox/VBoxSVC.log`
