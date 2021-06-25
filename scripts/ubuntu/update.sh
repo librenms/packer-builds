@@ -26,7 +26,7 @@ if [[ $UPDATE  =~ true || $UPDATE =~ 1 || $UPDATE =~ yes ]]; then
     apt -y autoremove --purge
 fi
 apt -y install build-essential linux-headers-generic
-apt -y install ssh nfs-common vim curl perl git
+apt -y install ssh nfs-common vim curl perl git cloud-init
 apt -y autoclean
 apt -y clean
 
