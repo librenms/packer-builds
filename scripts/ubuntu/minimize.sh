@@ -47,5 +47,10 @@ rm -rf /usr/share/doc/*
 echo "==> Removing caches"
 find /var/cache -type f -exec rm -rf {} \;
 
+# Zero out the free space to save space in the final image
+dd if=/dev/zero of=/EMPTY bs=1M  || echo "dd exit code $? is suppressed"
+rm -f /EMPTY
+sync
+
 echo "==> Disk usage after cleanup"
 df -h
