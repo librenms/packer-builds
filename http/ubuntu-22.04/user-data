@@ -1,0 +1,104 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: en_US.UTF-8
+  refresh-installer:
+      update: yes
+  keyboard:
+      layout: us
+  network:
+      network:
+          version: 2
+          ethernets:
+              eth0:
+                 dhcp4: yes
+  apt:
+      primary:
+          - arches: [default]
+            uri: http://archive.ubuntu.com/ubuntu/
+  storage:
+      swap:
+          size: 0
+      config:
+          - { type: disk, id: disk-0, ptable: gpt, wipe: superblock-recursive, grub_device: true }
+          - { type: partition, id: partition-0, number: 1, device: disk-0, size: 1M, wipe: superblock, flag: bios_grub }
+          - { type: partition, id: partition-1, number: 2, device: disk-0, size: 512M, wipe: superblock, flag: boot }
+          - { type: partition, id: partition-2, number: 3, device: disk-0, size: 8192M, wipe: superblock, flag: swap }
+          - { type: partition, id: partition-3, number: 4, device: disk-0, size: -1, wipe: superblock }
+          - { type: format, id: format-0, volume: partition-1, fstype: ext4 }
+          - { type: format, id: format-1, volume: partition-2, fstype: swap }
+          - { type: format, id: format-2, volume: partition-3, fstype: ext4 }
+          - { type: mount, id: mount-0, device: format-0, path: /boot }
+          - { type: mount, id: mount-1, device: format-1, path: none }
+          - { type: mount, id: mount-2, device: format-2, path: / }
+  identity:
+      username: root
+      hostname: ubuntu.localdomain
+      password: "$6$pniguAcReslhK$wwOrj4o.CXt6HL7NiOZ2J7/UOC4ivAIVs8BU/h6qpRIBdWX824Qg.VQadCVQCAJNr4/Fv3J55Zf936Jm5dlKT/"
+  ssh:
+      install-server: yes
+      authorized-keys: []
+      allow-pw: yes
+  user-data:
+      disable_root: false
+  packages:
+      - ca-certificates
+      - cloud-guest-utils
+      - cloud-init
+      - curl
+      - e2fsprogs
+      - iproute2
+      - openssh-server
+      - perl
+      - python3
+      - rsync
+      - sudo
+  early-commands:
+      - systemctl stop ssh.service
+  late-commands:
+      - |
+        curtin in-target --target=/target -- /bin/bash -c ' \
+            echo "root:vagrant" | chpasswd; \
+            rm -rf /root/.bash_logout; \
+            mkdir -p /root/.ssh; \
+            chmod 0700 /root/.ssh; \
+            echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key" > /root/.ssh/authorized_keys; \
+            chmod 0600 /root/.ssh/authorized_keys; \
+            chown -Rf root:root /root; \
+            groupadd -g 1000 vagrant; \
+            useradd -g 1000 -u 1000 -d /home/vagrant -s /bin/bash -m vagrant; \
+            echo "vagrant:vagrant" | chpasswd; \
+            rm -rf /home/vagrant/.bash_logout; \
+            mkdir -p /home/vagrant/.ssh; \
+            chmod 0700 /home/vagrant/.ssh; \
+            echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key" > /home/vagrant/.ssh/authorized_keys; \
+            chmod 0600 /home/vagrant/.ssh/authorized_keys; \
+            chown -Rf vagrant:vagrant /home/vagrant; \
+            mkdir -p /etc/sudoers.d; \
+            chmod 0755 /etc/sudoers.d; \
+            echo "vagrant ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/vagrant; \
+            chmod 0440 /etc/sudoers.d/vagrant; \
+            chown -Rf root:root /etc/sudoers.d; \
+            sed -ie "s/^[#\s]*UseDNS.*$/UseDNS no/g" /etc/ssh/sshd_config; \
+            ssh-keygen -A; \
+            systemctl enable ssh.service; \
+            sed -ie "s/^GRUB_DEFAULT=.*/GRUB_DEFAULT=\"0\"/g" /etc/default/grub; \
+            sed -ie "s/^GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX=\"net.ifnames=0 biosdevname=0 systemd.unified_cgroup_hierarchy=0\"/g" /etc/default/grub; \
+            sed -ie "s/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT=\"net.ifnames=0 biosdevname=0 systemd.unified_cgroup_hierarchy=0\"/g" /etc/default/grub; \
+            update-grub; \
+            update-initramfs -c -k all; \
+            mkdir -p /etc/ssh/sshd_config.d; \
+            echo "PubkeyAcceptedKeyTypes +ssh-rsa" > /etc/ssh/sshd_config.d/10-PubkeyAcceptedKeyTypes-ssh-rsa.conf; \
+            chmod 600 /etc/ssh/sshd_config.d/10-PubkeyAcceptedKeyTypes-ssh-rsa.conf; \
+            mkdir -p /etc/ssh/ssh_config.d; \
+            echo "Host *" >> /etc/ssh/ssh_config.d/10-PubkeyAcceptedKeyTypes-ssh-rsa.conf; \
+            echo "    HostkeyAlgorithms +ssh-rsa" >> /etc/ssh/ssh_config.d/10-PubkeyAcceptedKeyTypes-ssh-rsa.conf; \
+            echo "    PubkeyAcceptedKeyTypes +ssh-rsa" >> /etc/ssh/ssh_config.d/10-PubkeyAcceptedKeyTypes-ssh-rsa.conf; \
+            chmod 644 /etc/ssh/ssh_config.d/10-PubkeyAcceptedKeyTypes-ssh-rsa.conf; \
+            apt-get -y purge snapd; \
+            systemctl disable apt-daily.service; \
+            systemctl disable apt-daily.timer; \
+            systemctl disable apt-daily-upgrade.service; \
+            systemctl disable apt-daily-upgrade.timer; \
+            exit 0 \
+        '

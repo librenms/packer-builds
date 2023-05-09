@@ -1,0 +1,158 @@
+{
+  "builders": [
+    {
+      "boot_command": [
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "c<wait5>",
+        "set gfxpayload=keep<enter><wait5>",
+        "linux /casper/vmlinuz <wait5>",
+        "autoinstall quiet fsck.mode=skip <wait5>",
+        "net.ifnames=0 biosdevname=0 systemd.unified_cgroup_hierarchy=0 <wait5>",
+        "ds=\"nocloud-net;s=http://{{.HTTPIP}}:{{.HTTPPort}}/ubuntu-22.04/\" <wait5>",
+        "---<enter><wait5>",
+        "initrd /casper/initrd<enter><wait5>",
+        "boot<enter>"
+      ],
+      "boot_wait": "1s",
+      "cpus": "{{ user `cpus` }}",
+      "disk_size": "{{ user `disk_size` }}",
+      "guest_os_type": "Ubuntu_64",
+      "headless": "{{ user `headless` }}",
+      "http_directory": "http",
+      "iso_checksum": "5e38b55d57d94ff029719342357325ed3bda38fa80054f9330dc789cd2d43931",
+      "iso_url": "http://releases.ubuntu.com/22.04.2/ubuntu-22.04.2-live-server-amd64.iso",
+      "memory": "{{ user `memory` }}",
+      "shutdown_command": "sudo shutdown -h now",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_read_write_timeout": "600s",
+      "ssh_timeout": "120m",
+      "ssh_username": "vagrant",
+      "type": "virtualbox-iso",
+      "export_opts": [
+        "--manifest",
+        "--vsys",
+        "0",
+        "--product",
+        "LibreNMS",
+        "--producturl",
+        "https://www.librenms.org",
+        "--description",
+        "LibreNMS, a fully featured network monitoring system that provides a wealth of features and device support.",
+        "--version",
+        "LibreNMS"
+      ],
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpu-profile",
+          "host"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--nat-localhostreachable1",
+          "on"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--natpf1",
+          "ssh,tcp,,2023,,22"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--natpf1",
+          "http,tcp,,8080,,80"
+        ]
+      ],
+      "vrdp_bind_address": "0.0.0.0",
+      "vrdp_port_max": 6000,
+      "vrdp_port_min": 5900
+    }
+  ],
+  "post-processors": [
+    {
+      "compression_level": 9,
+      "keep_input_artifact": true,
+      "output": "output-vagrant/package.box",
+      "provider_override": "virtualbox",
+      "type": "vagrant"
+    }
+  ],
+  "provisioners": [
+    {
+      "destination": "/tmp/librenms.conf",
+      "source": "files/ubuntu/librenms.conf",
+      "type": "file"
+    },
+    {
+      "environment_vars": [
+        "DEBIAN_FRONTEND=noninteractive",
+        "DESKTOP={{user `desktop`}}",
+        "UPDATE={{user `update`}}",
+        "INSTALL_VAGRANT_KEY={{user `install_vagrant_key`}}",
+        "SSH_USERNAME={{user `ssh_username`}}",
+        "SSH_PASSWORD={{user `ssh_password`}}",
+        "http_proxy={{user `http_proxy`}}",
+        "https_proxy={{user `https_proxy`}}",
+        "no_proxy={{user `no_proxy`}}",
+        "LIBRENMS_VERSION={{user `librenms_version`}}",
+        "OXIDIZED={{user `oxidized`}}",
+        "SYSLOG_NG={{user `syslog_ng`}}"
+      ],
+      "execute_command": "echo '{{ user `ssh_password` }}' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
+      "expect_disconnect": true,
+      "scripts": [
+        "scripts/ubuntu/update.sh",
+        "scripts/ubuntu/vmware.sh",
+        "scripts/common/vagrant.sh",
+        "scripts/common/sshd.sh",
+        "scripts/ubuntu/librenms.sh",
+        "scripts/ubuntu/syslog-ng.sh",
+        "scripts/ubuntu/oxidized.sh",
+        "scripts/ubuntu/cleanup.sh",
+        "scripts/common/finish.sh",
+        "scripts/ubuntu/minimize.sh",
+        "scripts/common/clean_users.sh"
+      ],
+      "type": "shell"
+    }
+  ],
+  "variables": {
+    "boot_command_prefix": "<esc><esc><esc><enter><wait>",
+    "cpus": "1",
+    "desktop": "false",
+    "disk_size": "40960",
+    "headless": "false",
+    "hostname": "librenms",
+    "http_proxy": "{{env `http_proxy`}}",
+    "https_proxy": "{{env `https_proxy`}}",
+    "install_vagrant_key": "true",
+    "iso_checksum": "d1f2bf834bbe9bb43faf16f9be992a6f3935e65be0edece1dee2aa6eb1767423",
+    "iso_checksum_type": "sha256",
+    "iso_name": "ubuntu-20.04.2-live-server-amd64.iso",
+    "iso_path": "iso",
+    "memory": "2048",
+    "mirror": "http://releases.ubuntu.com",
+    "no_proxy": "{{env `no_proxy`}}",
+    "ssh_fullname": "vagrant",
+    "ssh_password": "vagrant",
+    "ssh_timeout": "60m",
+    "ssh_username": "vagrant",
+    "update": "true",
+    "librenms_version": "master"
+  }
+}
+

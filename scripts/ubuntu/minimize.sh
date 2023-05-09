@@ -31,7 +31,7 @@ dpkg --list | awk '{ print $2 }' | grep -- '-doc$' | xargs apt-get -y purge
 #echo "==> Removing default system Python"
 #apt-get -y purge python-dbus libnl1 python-smartpm python-twisted-core libiw30 python-twisted-bin libdbus-glib-1-2 python-pexpect python-pycurl python-serial python-gobject python-pam python-openssl libffi5
 echo "==> Removing other oddities"
-apt-get -y purge popularity-contest installation-report landscape-common wireless-tools wpasupplicant ubuntu-serverguide
+apt-get -y purge popularity-contest landscape-common wireless-tools wpasupplicant
 apt-get -y purge nano
 
 # Clean up the apt cache
