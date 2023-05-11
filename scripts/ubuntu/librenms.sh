@@ -7,7 +7,8 @@ echo '==> Aquiring prerequisite packages'
 apt -y install software-properties-common
 add-apt-repository universe
 apt -y update
-apt -y install acl curl composer fping git graphviz imagemagick mariadb-client mariadb-server mtr-tiny nginx-full nmap php7.4-cli php7.4-curl php7.4-fpm php7.4-gd php7.4-json php7.4-mbstring php7.4-mysql php7.4-snmp php7.4-xml php7.4-zip rrdtool snmp snmpd whois unzip python3-pymysql python3-dotenv python3-redis python3-setuptools
+apt -y install acl curl fping git graphviz imagemagick mariadb-client mariadb-server mtr-tiny nginx-full nmap php-cli php-curl php-fpm php-gd php-gmp php-json php-mbstring php-mysql php-snmp php-xml php-zip rrdtool snmp snmpd whois unzip python3-pymysql python3-dotenv python3-redis python3-setuptools python3-systemd python3-pip
+
 
 echo '==> Downloading LibreNMS'
 
@@ -21,23 +22,31 @@ EOF'
 sudo chmod 440 /etc/sudoers.d/librenms
 
 cd /opt
-git clone https://github.com/librenms/librenms.git
+git clone --branch master --depth 1 https://github.com/librenms/librenms.git
 chown -R librenms:librenms /opt/librenms
 chmod 771 /opt/librenms
 setfacl -d -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
 setfacl -R -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
 cd /opt/librenms
+if [[ "$LIBRENMS_VERSION" == "release" ]]; then
+#sudo -u librenms git fetch --tags && sudo -u librenms git checkout $(sudo -u librenms git describe --tags $(sudo -u librenms git rev-list --tags --max-count=1))
+RELEASE=$(sudo -u librenms git ls-remote --tags origin|tail -1|cut -d$'\t' -f1)
+sudo -u librenms git fetch origin "$RELEASE"
+sudo -u librenms git checkout "$RELEASE"
+#sudo -u librenms git checkout $(sudo -u librenms git fetch origin $(sudo -u librenms git ls-remote --tags origin|tail -1|cut -d$'\t' -f1))
+fi
+echo '==> Running composer install'
 sudo -u librenms ./scripts/composer_wrapper.php install --no-dev
 
 echo '==> Configuring PHP'
-sudo sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php/7.4/fpm/php.ini
-sudo sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php/7.4/cli/php.ini
-mv /etc/php/7.4/fpm/pool.d/www.conf /etc/php/7.4/fpm/pool.d/librenms.conf
-sed -i "s/user = .*/user = librenms/" /etc/php/7.4/fpm/pool.d/librenms.conf
-sed -i "s/group = .*/group = librenms/" /etc/php/7.4/fpm/pool.d/librenms.conf
-sed -i "s|listen = .*|listen = /run/php-fpm-librenms.sock|" /etc/php/7.4/fpm/pool.d/librenms.conf
-systemctl restart php7.4-fpm.service
-systemctl enable php7.4-fpm.service
+sudo sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php/8.1/fpm/php.ini
+sudo sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php/8.1/cli/php.ini
+mv /etc/php/8.1/fpm/pool.d/www.conf /etc/php/8.1/fpm/pool.d/librenms.conf
+sed -i "s/user = .*/user = librenms/" /etc/php/8.1/fpm/pool.d/librenms.conf
+sed -i "s/group = .*/group = librenms/" /etc/php/8.1/fpm/pool.d/librenms.conf
+sed -i "s|listen = .*|listen = /run/php-fpm-librenms.sock|" /etc/php/8.1/fpm/pool.d/librenms.conf
+systemctl restart php8.1-fpm.service
+systemctl enable php8.1-fpm.service
 
 echo '==> Installing lnms'
 ln -s /opt/librenms/lnms /usr/bin/lnms
@@ -88,7 +97,7 @@ sudo systemctl restart mariadb
 
 mysql_pass="D42nf23rewD";
 
-echo "CREATE DATABASE librenms CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+echo "CREATE DATABASE librenms CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
             GRANT ALL PRIVILEGES ON librenms.*
             TO 'librenms'@'localhost'
             IDENTIFIED BY '$mysql_pass';

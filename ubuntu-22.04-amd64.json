@@ -1,20 +1,48 @@
 {
-  "_comment": "Build with `packer build ubuntu.json`",
   "builders": [
     {
       "boot_command": [
-        "{{ user `boot_command_prefix` }}",
-        "/casper/vmlinuz ",
-        "root=/dev/sr0 ",
-        "initrd=/casper/initrd ",
-	"acpi=off noapic ",
-        "autoinstall ",
-        "ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ubuntu-20.04/",
-        "<enter>"
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>",
+        "c<wait5>",
+        "set gfxpayload=keep<enter><wait5>",
+        "linux /casper/vmlinuz <wait5>",
+        "autoinstall quiet fsck.mode=skip <wait5>",
+        "net.ifnames=0 biosdevname=0 systemd.unified_cgroup_hierarchy=0 <wait5>",
+        "ds=\"nocloud-net;s=http://{{.HTTPIP}}:{{.HTTPPort}}/ubuntu-22.04/\" <wait5>",
+        "---<enter><wait5>",
+        "initrd /casper/initrd<enter><wait5>",
+        "boot<enter>"
       ],
-      "boot_wait": "5s",
-      "boot_keygroup_interval": "300ms",
+      "boot_wait": "1s",
+      "cpus": "{{ user `cpus` }}",
       "disk_size": "{{ user `disk_size` }}",
+      "format": "ova",
+      "guest_os_type": "Ubuntu_64",
+      "headless": "{{ user `headless` }}",
+      "http_directory": "http",
+      "iso_checksum": "{{ user `iso_checksum_type` }}:{{ user `iso_checksum` }}",
+      "iso_urls": [
+        "{{ user `iso_path` }}/{{ user `iso_name` }}",
+        "{{ user `mirror` }}/22.04.2/{{ user `iso_name` }}"
+      ],
+      "memory": "{{ user `memory` }}",
+      "output_directory": "output-ubuntu-22.04-amd64",
+      "shutdown_command": "sudo shutdown -h now",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_read_write_timeout": "600s",
+      "ssh_timeout": "120m",
+      "ssh_username": "vagrant",
+      "type": "virtualbox-iso",
       "export_opts": [
         "--manifest",
         "--vsys",
@@ -28,59 +56,18 @@
         "--version",
         "LibreNMS"
       ],
-      "format": "ova",
-      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
-      "guest_os_type": "Ubuntu_64",
-      "headless": "{{ user `headless` }}",
-      "http_directory": "http",
-      "iso_checksum": "{{ user `iso_checksum_type` }}:{{ user `iso_checksum` }}",
-      "iso_urls": [
-        "{{ user `iso_path` }}/{{ user `iso_name` }}",
-        "{{ user `mirror` }}/focal/{{ user `iso_name` }}"
-      ],
-      "output_directory": "output-ubuntu-20.04-amd64-{{build_type}}",
-      "shutdown_command": "sudo usermod -L vagrant \u0026\u0026 sudo chage -d 0 vagrant \u0026\u0026 sudo systemctl poweroff",
-      "ssh_handshake_attempts":"1000",
-      "ssh_password": "{{ user `ssh_password` }}",
-      "ssh_timeout": "{{user `ssh_timeout`}}",
-      "ssh_username": "{{ user `ssh_username` }}",
-      "type": "virtualbox-iso",
       "vboxmanage": [
         [
           "modifyvm",
           "{{.Name}}",
-          "--audio",
-          "none"
+          "--cpu-profile",
+          "host"
         ],
         [
           "modifyvm",
           "{{.Name}}",
-          "--usb",
-          "off"
-        ],
-        [
-          "modifyvm",
-          "{{.Name}}",
-          "--vram",
-          "12"
-        ],
-        [
-          "modifyvm",
-          "{{.Name}}",
-          "--vrde",
-          "off"
-        ],
-        [
-          "modifyvm",
-          "{{.Name}}",
-          "--memory",
-          "{{ user `memory` }}"
-        ],
-        [
-          "modifyvm",
-          "{{.Name}}",
-          "--cpus",
-          "{{ user `cpus` }}"
+          "--nat-localhostreachable1",
+          "on"
         ],
         [
           "modifyvm",
@@ -96,7 +83,19 @@
         ]
       ],
       "virtualbox_version_file": ".vbox_version",
-      "vm_name": "librenms-ubuntu-20.04-amd64"
+      "vm_name": "librenms-ubuntu-22.04-amd64",
+      "vrdp_bind_address": "0.0.0.0",
+      "vrdp_port_max": 6000,
+      "vrdp_port_min": 5900
+    }
+  ],
+  "post-processors": [
+    {
+      "compression_level": 9,
+      "keep_input_artifact": true,
+      "output": "output-ubuntu-22.04-amd64/librenms-vagrant.box",
+      "provider_override": "virtualbox",
+      "type": "vagrant"
     }
   ],
   "provisioners": [
@@ -115,7 +114,6 @@
         "SSH_PASSWORD={{user `ssh_password`}}",
         "http_proxy={{user `http_proxy`}}",
         "https_proxy={{user `https_proxy`}}",
-        "no_proxy={{user `no_proxy`}}",
         "LIBRENMS_VERSION={{user `librenms_version`}}",
         "OXIDIZED={{user `oxidized`}}",
         "SYSLOG_NG={{user `syslog_ng`}}"
@@ -124,7 +122,6 @@
       "expect_disconnect": true,
       "scripts": [
         "scripts/ubuntu/update.sh",
-        "scripts/ubuntu/virtualbox.sh",
         "scripts/ubuntu/vmware.sh",
         "scripts/common/vagrant.sh",
         "scripts/common/sshd.sh",
@@ -140,20 +137,16 @@
     }
   ],
   "variables": {
-    "boot_command_prefix": "<esc><esc><esc><enter><wait>",
     "cpus": "1",
     "desktop": "false",
     "disk_size": "40960",
     "headless": "false",
-    "hostname": "librenms",
-    "http_proxy": "{{env `http_proxy`}}",
-    "https_proxy": "{{env `https_proxy`}}",
     "install_vagrant_key": "true",
-    "iso_checksum": "d1f2bf834bbe9bb43faf16f9be992a6f3935e65be0edece1dee2aa6eb1767423",
+    "iso_checksum": "5e38b55d57d94ff029719342357325ed3bda38fa80054f9330dc789cd2d43931",
     "iso_checksum_type": "sha256",
-    "iso_name": "ubuntu-20.04.2-live-server-amd64.iso",
+    "iso_name": "ubuntu-22.04.2-live-server-amd64.iso",
     "iso_path": "iso",
-    "memory": "512",
+    "memory": "2048",
     "mirror": "http://releases.ubuntu.com",
     "no_proxy": "{{env `no_proxy`}}",
     "ssh_fullname": "vagrant",

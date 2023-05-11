@@ -57,8 +57,14 @@ df -h
 echo '==> Clearing Ubuntu machine-id'
 sudo cp /dev/null /etc/machine-id
 
-echo '==> Resetting networking'
-rm -f /etc/netplan/*.yaml \
-    /etc/cloud/cloud.cfg.d/99-installer.cfg \
-    /etc/cloud/cloud.cfg.d/subiquity-disable-cloudinit-networking.cfg
+sudo bash -c 'cat << EOF > /etc/netplan/01-netcfg.yaml
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth:
+      match:
+        name: en*
+      dhcp4: yes
+EOF'
 cloud-init clean --seed --logs

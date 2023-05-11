@@ -31,7 +31,7 @@ dpkg --list | awk '{ print $2 }' | grep -- '-doc$' | xargs apt-get -y purge
 #echo "==> Removing default system Python"
 #apt-get -y purge python-dbus libnl1 python-smartpm python-twisted-core libiw30 python-twisted-bin libdbus-glib-1-2 python-pexpect python-pycurl python-serial python-gobject python-pam python-openssl libffi5
 echo "==> Removing other oddities"
-apt-get -y purge popularity-contest installation-report landscape-common wireless-tools wpasupplicant ubuntu-serverguide
+apt-get -y purge popularity-contest landscape-common wireless-tools wpasupplicant
 apt-get -y purge nano
 
 # Clean up the apt cache
@@ -46,6 +46,15 @@ echo "==> Removing any docs"
 rm -rf /usr/share/doc/*
 echo "==> Removing caches"
 find /var/cache -type f -exec rm -rf {} \;
+echo "==> Removing snapd files"
+rm -rf /var/lib/snapd/seed/ /var/lib/snapd/snaps/
+echo "==> Removing journal files"
+rm -rf /var/log/journal/*
+echo "==> Cleaning up LibreNMS"
+rm -rf /opt/librenms/rrd/* /opt/librenms/.cache/composer/*
+cd /opt/librenms; sudo -u librenms git repack -a -d --depth=250 --window=250
+echo "==> Removing VBoxGuestAdditions.iso"
+rm -f /home/vagrant/VBoxGuestAdditions.iso
 
 # Zero out the free space to save space in the final image
 dd if=/dev/zero of=/EMPTY bs=1M  || echo "dd exit code $? is suppressed"
