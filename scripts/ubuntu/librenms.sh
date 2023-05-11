@@ -22,12 +22,20 @@ EOF'
 sudo chmod 440 /etc/sudoers.d/librenms
 
 cd /opt
-git clone https://github.com/librenms/librenms.git
+git clone --branch master --depth 1 https://github.com/librenms/librenms.git
 chown -R librenms:librenms /opt/librenms
 chmod 771 /opt/librenms
 setfacl -d -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
 setfacl -R -m g::rwx /opt/librenms/rrd /opt/librenms/logs /opt/librenms/bootstrap/cache/ /opt/librenms/storage/
 cd /opt/librenms
+if [[ "$LIBRENMS_VERSION" == "release" ]]; then
+#sudo -u librenms git fetch --tags && sudo -u librenms git checkout $(sudo -u librenms git describe --tags $(sudo -u librenms git rev-list --tags --max-count=1))
+RELEASE=$(sudo -u librenms git ls-remote --tags origin|tail -1|cut -d$'\t' -f1)
+sudo -u librenms git fetch origin "$RELEASE"
+sudo -u librenms git checkout "$RELEASE"
+#sudo -u librenms git checkout $(sudo -u librenms git fetch origin $(sudo -u librenms git ls-remote --tags origin|tail -1|cut -d$'\t' -f1))
+fi
+echo '==> Running composer install'
 sudo -u librenms ./scripts/composer_wrapper.php install --no-dev
 
 echo '==> Configuring PHP'
@@ -89,7 +97,7 @@ sudo systemctl restart mariadb
 
 mysql_pass="D42nf23rewD";
 
-echo "CREATE DATABASE librenms CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+echo "CREATE DATABASE librenms CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
             GRANT ALL PRIVILEGES ON librenms.*
             TO 'librenms'@'localhost'
             IDENTIFIED BY '$mysql_pass';

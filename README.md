@@ -3,7 +3,9 @@
 
 Clone the repository:
 
-    $ git clone https://github.com/librenms/packer-builds && cd packer-builds
+```bash
+git clone https://github.com/librenms/packer-builds && cd packer-builds
+```
 
 Install requirements:
 
@@ -21,15 +23,17 @@ You can configure each template to match your requirements by setting the follow
  `headless`          | 0             | [Documentation](https://packer.io/docs/builders/virtualbox-iso.html#headless)
  `memory`            | 512           | Memory size in MB
  `mirror`            |               | A URL of the mirror where the ISO image is available
- `librenms_version`  | master        | The version to build LibreNMS agains. You can use a branch name or tag
+ `librenms_version`  | master        | Available options are master or release, master will be up to the latest commit and release will be the latest tag
  `oxidized`          | true          | Install Oxidized as part of the image
  `syslog_ng`         | true          | Install and configure Syslog-NG
 
 ### Example
 
-Build a LibreNMS CentOS 7 (NGINX) box with a 10GB hard disk using the VirtualBox provider:
+Build a LibreNMS Ubuntu 22.04 (NGINX) box with a 10GB hard disk using the VirtualBox provider:
 
-    $ packer build -only=virtualbox-iso -var disk_size=10000 centos-7.6-x86_64.json
+```bash
+packer build -only=virtualbox-iso -var disk_size=10000 ubuntu-22.04-amd64.json
+```
 
 If running on a remote system over ssh, or on a system without a graphical
 console, add `-var headless=true`

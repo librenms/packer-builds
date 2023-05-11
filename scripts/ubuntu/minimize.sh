@@ -46,6 +46,15 @@ echo "==> Removing any docs"
 rm -rf /usr/share/doc/*
 echo "==> Removing caches"
 find /var/cache -type f -exec rm -rf {} \;
+echo "==> Removing snapd files"
+rm -rf /var/lib/snapd/seed/ /var/lib/snapd/snaps/
+echo "==> Removing journal files"
+rm -rf /var/log/journal/*
+echo "==> Cleaning up LibreNMS"
+rm -rf /opt/librenms/rrd/* /opt/librenms/.cache/composer/*
+cd /opt/librenms; sudo -u librenms git repack -a -d --depth=250 --window=250
+echo "==> Removing VBoxGuestAdditions.iso"
+rm -f /home/vagrant/VBoxGuestAdditions.iso
 
 # Zero out the free space to save space in the final image
 dd if=/dev/zero of=/EMPTY bs=1M  || echo "dd exit code $? is suppressed"

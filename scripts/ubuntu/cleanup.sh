@@ -57,4 +57,14 @@ df -h
 echo '==> Clearing Ubuntu machine-id'
 sudo cp /dev/null /etc/machine-id
 
+sudo bash -c 'cat << EOF > /etc/netplan/01-netcfg.yaml
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth:
+      match:
+        name: en*
+      dhcp4: yes
+EOF'
 cloud-init clean --seed --logs
